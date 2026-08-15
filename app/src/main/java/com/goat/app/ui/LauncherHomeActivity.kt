@@ -103,7 +103,7 @@ class LauncherHomeActivity : AppCompatActivity() {
 
         private const val FIX_ISSUES_PREFS_NAME = "goat_launcher_fix_issues_state"
         private const val KEY_LAST_FIX_ISSUES_TIME = "last_fix_issues_time"
-        private const val FIX_ISSUES_COOLDOWN_MS = 30 * 60 * 1000L
+        private const val FIX_ISSUES_COOLDOWN_MS = 3 * 60 * 1000L
 
         private fun clearAllCachedState() {
             cachedExpandPanelMethod = null
