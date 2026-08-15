@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Simple restart / refresh glyph so the button reads as "restart the
-     launcher" at a glance, without any text needed. -->
+
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="14dp"
     android:height="14dp"
