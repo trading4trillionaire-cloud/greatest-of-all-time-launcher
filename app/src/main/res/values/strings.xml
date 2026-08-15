@@ -13,4 +13,5 @@
     <string name="watch_ad_title_line1">Watch Ad</string>
     <string name="watch_ad_title_line2">Unlock for 3 Hours</string>
     <string name="continue_button_text">Continue</string>
+    <string name="no_thanks_button_text">No Thanks</string>
 </resources>
