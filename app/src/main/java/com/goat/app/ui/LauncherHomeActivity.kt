@@ -15,11 +15,9 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.Process
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
@@ -103,10 +101,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         private const val IMPRESSION_COOLDOWN_MS = 15_000L
 
         private const val CACHE_EXPIRY_MS = 45 * 60 * 1000L
-
-        private const val FIX_ISSUE_PREFS_NAME = "goat_launcher_prefs"
-        private const val KEY_LAST_FIX_ISSUE_TIME = "last_fix_issue_time"
-        private const val FIX_ISSUE_COOLDOWN_MS = 15 * 60 * 1000L
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -125,7 +119,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         setupGestures()
         setupDrawer()
         setupSwipeUpHint()
-        setupFixIssueButton()
 
         val cached = cachedApps
         if (cached != null) {
@@ -151,8 +144,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         super.onResume()
 
         hintAnimator?.let { if (it.isPaused) it.resume() }
-
-        updateFixIssueButtonVisibility()
 
         val now = System.currentTimeMillis()
         if (cachedAd != null && (now - loadTime) > CACHE_EXPIRY_MS) {
@@ -482,29 +473,6 @@ class LauncherHomeActivity : AppCompatActivity() {
 
     private fun calculateRecyclePoolSize(spanCount: Int): Int {
         return spanCount * (VISIBLE_ROW_COUNT + 2)
-    }
-
-    private fun fixIssuePrefs(): SharedPreferences =
-        getSharedPreferences(FIX_ISSUE_PREFS_NAME, Context.MODE_PRIVATE)
-
-    private fun setupFixIssueButton() {
-        updateFixIssueButtonVisibility()
-        binding.btnFixIssue.setOnClickListener {
-            performFixIssueRestart()
-        }
-    }
-
-    private fun updateFixIssueButtonVisibility() {
-        val lastFixTime = fixIssuePrefs().getLong(KEY_LAST_FIX_ISSUE_TIME, 0L)
-        val elapsed = System.currentTimeMillis() - lastFixTime
-        binding.btnFixIssue.visibility =
-            if (elapsed >= FIX_ISSUE_COOLDOWN_MS) View.VISIBLE else View.GONE
-    }
-
-    private fun performFixIssueRestart() {
-        fixIssuePrefs().edit().putLong(KEY_LAST_FIX_ISSUE_TIME, System.currentTimeMillis()).commit()
-        binding.btnFixIssue.visibility = View.GONE
-        Process.killProcess(Process.myPid())
     }
 
     private fun closeDrawer() {
