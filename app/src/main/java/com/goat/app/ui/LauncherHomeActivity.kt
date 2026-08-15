@@ -101,6 +101,12 @@ class LauncherHomeActivity : AppCompatActivity() {
         private const val IMPRESSION_COOLDOWN_MS = 15_000L
 
         private const val CACHE_EXPIRY_MS = 45 * 60 * 1000L
+
+        private fun clearAllCachedState() {
+            cachedExpandPanelMethod = null
+            cachedApps = null
+            drawerIconSizingCache.clear()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -119,6 +125,7 @@ class LauncherHomeActivity : AppCompatActivity() {
         setupGestures()
         setupDrawer()
         setupSwipeUpHint()
+        setupFixIssueButton()
 
         val cached = cachedApps
         if (cached != null) {
@@ -473,6 +480,37 @@ class LauncherHomeActivity : AppCompatActivity() {
 
     private fun calculateRecyclePoolSize(spanCount: Int): Int {
         return spanCount * (VISIBLE_ROW_COUNT + 2)
+    }
+
+    private fun setupFixIssueButton() {
+        binding.btnFixIssue.setOnClickListener {
+            performFreshRestart()
+        }
+    }
+
+    private fun performFreshRestart() {
+        cachedAd?.destroy()
+        cachedAd = null
+        displayedAd?.destroy()
+        displayedAd = null
+        loadTime = 0L
+        lastImpressionTime = 0L
+        isAdFetchInFlight = false
+
+        clearAllCachedState()
+
+        val allPrefsDir = java.io.File(applicationInfo.dataDir, "shared_prefs")
+        allPrefsDir.listFiles()?.forEach { prefFile ->
+            val prefName = prefFile.name.removeSuffix(".xml")
+            getSharedPreferences(prefName, Context.MODE_PRIVATE).edit().clear().commit()
+        }
+
+        val intent = Intent(this, LauncherHomeActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+            Intent.FLAG_ACTIVITY_CLEAR_TASK or
+            Intent.FLAG_ACTIVITY_CLEAR_TOP
+        startActivity(intent)
+        finish()
     }
 
     private fun closeDrawer() {
