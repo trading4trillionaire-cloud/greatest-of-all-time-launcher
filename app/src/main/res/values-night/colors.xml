@@ -9,8 +9,6 @@
     <color name="text_primary">#EEF1F8</color>
     <color name="text_on_primary">#FFFFFF</color>
 
-    <color name="ic_launcher_background">#2A5CD8</color>
-
     <color name="launcher_gradient_start">#5B8DEF</color>
     <color name="launcher_gradient_end">#2A5CD8</color>
 
