@@ -3,6 +3,7 @@ package com.goat.app.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.goat.app.databinding.ActivityWatchAdUnlockBinding
 import com.google.android.gms.ads.AdError
@@ -21,9 +22,13 @@ class WatchAdUnlockActivity : AppCompatActivity() {
     private var isLoadingAd = false
     private var isAdInitialized = false
 
+    // True when the user tapped Continue before the ad had finished loading —
+    // once the ad loads we show it automatically instead of leaving them stuck.
+    private var showAdOnceLoaded = false
+
     companion object {
 
-        // TEST ad unit — replace with the real rewarded ad unit ID before going live.
+        // Google's official TEST rewarded ad unit ID — always returns a test ad, never a real one.
         private const val REWARDED_AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917"
 
         const val PREFS_NAME = "goat_unlock_prefs"
@@ -46,6 +51,10 @@ class WatchAdUnlockActivity : AppCompatActivity() {
         binding.btnContinue.setOnClickListener {
             onContinueClicked()
         }
+
+        binding.btnNoThanks.setOnClickListener {
+            goToLauncher()
+        }
     }
 
     private fun loadRewardedAd() {
@@ -60,11 +69,25 @@ class WatchAdUnlockActivity : AppCompatActivity() {
                 override fun onAdLoaded(ad: RewardedAd) {
                     isLoadingAd = false
                     rewardedAd = ad
+
+                    if (showAdOnceLoaded) {
+                        showAdOnceLoaded = false
+                        presentAd(ad)
+                    }
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     isLoadingAd = false
                     rewardedAd = null
+
+                    if (showAdOnceLoaded) {
+                        showAdOnceLoaded = false
+                        Toast.makeText(
+                            this@WatchAdUnlockActivity,
+                            "Ad load nahi ho paya, dobara try karo",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
             }
         )
@@ -73,12 +96,21 @@ class WatchAdUnlockActivity : AppCompatActivity() {
     private fun onContinueClicked() {
         val ad = rewardedAd
 
-        if (ad == null) {
-            // Ad not ready yet — try to (re)load it and let the user tap again shortly.
-            if (isAdInitialized) loadRewardedAd()
+        if (ad != null) {
+            presentAd(ad)
             return
         }
 
+        // Ad isn't ready yet — mark intent to show it as soon as it loads, and (re)trigger a load.
+        showAdOnceLoaded = true
+        Toast.makeText(this, "Ad load ho raha hai...", Toast.LENGTH_SHORT).show()
+
+        if (isAdInitialized) {
+            loadRewardedAd()
+        }
+    }
+
+    private fun presentAd(ad: RewardedAd) {
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdDismissedFullScreenContent() {
                 rewardedAd = null
@@ -86,6 +118,11 @@ class WatchAdUnlockActivity : AppCompatActivity() {
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 rewardedAd = null
+                Toast.makeText(
+                    this@WatchAdUnlockActivity,
+                    "Ad show nahi ho paya, dobara try karo",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
@@ -101,6 +138,10 @@ class WatchAdUnlockActivity : AppCompatActivity() {
             .apply()
 
         startActivity(Intent(this, UnlockedContentActivity::class.java))
+        finish()
+    }
+
+    private fun goToLauncher() {
         finish()
     }
 }
