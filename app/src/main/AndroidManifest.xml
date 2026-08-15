@@ -47,5 +47,15 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.WatchAdUnlockActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.UnlockedContentActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
     </application>
 </manifest>
