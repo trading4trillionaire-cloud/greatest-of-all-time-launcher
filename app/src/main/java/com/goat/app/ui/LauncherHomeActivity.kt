@@ -45,6 +45,12 @@ class LauncherHomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLauncherHomeBinding
     private var isDrawerOpen = false
 
+    // Modification: is Activity instance ke liye resolved icon/label size —
+    // ek hi baar (cache hit ya calculate karke) set hota hai, phir wahi
+    // dono jagah (cached list se turant load + async scan ke baad) AppListAdapter
+    // ko diya jaata hai.
+    private lateinit var drawerIconSizing: DrawerIconSizing
+
     private var hintAnimator: ObjectAnimator? = null
     private var snapAnimator: ValueAnimator? = null
 
@@ -98,6 +104,30 @@ class LauncherHomeActivity : AppCompatActivity() {
         private const val HOME_MIN_ALPHA = 0.1f
         private const val DRAG_TOUCH_SLOP_PX = 8f
         private const val ICON_TARGET_SIZE_DP = 48
+        private const val BASE_LABEL_TEXT_SIZE_SP = 12f
+
+        // Modification: do apps ke beech ka horizontal gap (column ke andar
+        // icon ke left/right ka khaali space) ko is fraction tak laana hai.
+        // Icon+label size tab tak (ek sath, proportionally) badhaye jaate
+        // hain jab tak column-width ka sirf 20% hi gap ke roop mein bache.
+        private const val TARGET_GAP_FRACTION = 0.20f
+
+        // Safety clamps — bahut chhote ya bahut bade screens par icon/text
+        // itna zyada bada/chhota na ho jaaye ki drawer bhadda dikhne lage.
+        private const val MAX_ICON_SIZE_DP = 88
+        private const val MAX_LABEL_TEXT_SIZE_SP = 20f
+
+        // item_app.xml mein ImageView ke paddingStart+paddingEnd (4dp + 4dp)
+        // ke barabar — column width se icon ke liye available width nikalte
+        // waqt isko ghata dete hain.
+        private const val ITEM_HORIZONTAL_PADDING_DP = 8f
+
+        // Modification: har (columnWidthPx) ke liye icon/label size sirf ek
+        // baar calculate hota hai aur yahan (companion/static, isliye
+        // Activity dobara ban ne par bhi) yaad rehta hai. Agli baar drawer
+        // khulne par same screen-width + column-count ke liye seedha yahi
+        // cached value re-use ho jaata hai — dobara calculation nahi hoti.
+        private val drawerIconSizingCache = mutableMapOf<Int, DrawerIconSizing>()
 
         // TEST native ad unit ID (Google official). Replace with your real Native Ad Unit ID before release.
         private const val NATIVE_AD_UNIT_ID = "ca-app-pub-3940256099942544/2247696110"
@@ -129,6 +159,12 @@ class LauncherHomeActivity : AppCompatActivity() {
             }
         })
 
+        // Modification: icon/label sizing screen-width aur column-count se
+        // decide hoti hai — dono cheezein view layout ke bina hi pata hain,
+        // isliye ye yahin, sabse pehle, resolve kar lete hain (cache hit ho
+        // to turant, warna ek baar calculate karke cache mein daal dete hain).
+        drawerIconSizing = resolveDrawerIconSizing()
+
         setupGestures()
         setupDrawer()
         setupSwipeUpHint()
@@ -138,7 +174,7 @@ class LauncherHomeActivity : AppCompatActivity() {
         // to seedha usi se turant dikha do — koi fresh scan nahi.
         val cached = cachedApps
         if (cached != null) {
-            binding.rvApps.adapter = AppListAdapter(cached) { app -> launchApp(app) }
+            binding.rvApps.adapter = AppListAdapter(cached, drawerIconSizing) { app -> launchApp(app) }
         } else {
             loadAppsAsync()
         }
@@ -522,6 +558,51 @@ class LauncherHomeActivity : AppCompatActivity() {
     }
 
     /**
+     * Modification: app drawer ke icon aur uske label ka size — dono ek sath,
+     * proportionally — tab tak badhaye jaate hain jab tak column ke andar
+     * icon ke aas-paas ka horizontal khaali gap (jo abhi bahut zyada tha)
+     * sirf TARGET_GAP_FRACTION (20%) reh jaaye. Rows ke beech ka gap
+     * (rowSpacingDecoration) alag hai aur isse touch nahi kiya gaya.
+     *
+     * Result ko [drawerIconSizingCache] mein (screen-width + column-count
+     * ke combination ke against) yaad rakha jaata hai, isliye agli baar
+     * wahi combination aane par seedha cached value use hoti hai — poora
+     * calculation dobara nahi karna padta.
+     */
+    private fun resolveDrawerIconSizing(): DrawerIconSizing {
+        val spanCount = calculateSpanCount()
+        val screenWidthPx = resources.displayMetrics.widthPixels
+        val columnWidthPx = screenWidthPx / spanCount
+
+        drawerIconSizingCache[columnWidthPx]?.let { return it }
+
+        val density = resources.displayMetrics.density
+        val baseIconSizePx = (ICON_TARGET_SIZE_DP * density).toInt()
+        val itemPaddingPx = (ITEM_HORIZONTAL_PADDING_DP * density)
+
+        // Column ke andar icon ke liye jitni width mil sakti hai (item ka
+        // apna left/right padding ghata ke).
+        val availableWidthPx = (columnWidthPx - itemPaddingPx)
+            .coerceAtLeast(baseIconSizePx.toFloat())
+
+        // 20% gap chahiye => icon column ke available-width ka 80% cover kare.
+        val idealIconSizePx = (availableWidthPx * (1f - TARGET_GAP_FRACTION)).toInt()
+        val maxIconSizePx = (MAX_ICON_SIZE_DP * density).toInt()
+        val resolvedIconSizePx = idealIconSizePx.coerceIn(baseIconSizePx, maxIconSizePx)
+
+        // Label size icon ke saath hi proportionally scale hota hai, taaki
+        // dono ek sath bade dikhein (icon akela bada aur text chhota — ya
+        // ulta — ajeeb lagta).
+        val scale = resolvedIconSizePx.toFloat() / baseIconSizePx.toFloat()
+        val resolvedTextSizeSp = (BASE_LABEL_TEXT_SIZE_SP * scale)
+            .coerceIn(BASE_LABEL_TEXT_SIZE_SP, MAX_LABEL_TEXT_SIZE_SP)
+
+        val sizing = DrawerIconSizing(resolvedIconSizePx, resolvedTextSizeSp)
+        drawerIconSizingCache[columnWidthPx] = sizing
+        return sizing
+    }
+
+    /**
      * Optimization #6: kitne "extra" recycled item views yaad rakhne hain,
      * ye screen par ek saath dikhne wali rows ke hisaab se decide karte hain
      * (visible rows + thoda buffer), fixed hardcoded number ke bajaye.
@@ -590,7 +671,11 @@ class LauncherHomeActivity : AppCompatActivity() {
                 emptyList()
             }
 
-            val iconSizePx = (ICON_TARGET_SIZE_DP * resources.displayMetrics.density).toInt()
+            // Modification: icon bitmap ab drawerIconSizing.iconSizePx (jo
+            // display size hai) par hi bake hota hai — pehle ye hamesha
+            // fixed 48dp par bake hota tha, isliye display-time par bada
+            // dikhane ke liye upscale karna padta, jo blurry ho jaata.
+            val iconSizePx = drawerIconSizing.iconSizePx
             // Ek hi Canvas object poori list ke saare icons ke liye reuse hoga.
             val reusableCanvas = Canvas()
 
@@ -612,7 +697,7 @@ class LauncherHomeActivity : AppCompatActivity() {
 
             Handler(Looper.getMainLooper()).post {
                 if (!isFinishing) {
-                    binding.rvApps.adapter = AppListAdapter(apps) { app -> launchApp(app) }
+                    binding.rvApps.adapter = AppListAdapter(apps, drawerIconSizing) { app -> launchApp(app) }
                 }
             }
         }
