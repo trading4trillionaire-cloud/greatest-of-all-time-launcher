@@ -59,6 +59,8 @@ class UnlockedContentActivity : AppCompatActivity() {
     }
 
     private fun renderStep() {
+        binding.btnPrimaryAction.setBackgroundResource(R.drawable.bg_primary_action_button)
+
         when (currentStep) {
             0 -> {
                 showSingleImageStep(title = getString(R.string.step_title_format, 1), asset = "1.jpg")
@@ -87,6 +89,7 @@ class UnlockedContentActivity : AppCompatActivity() {
                     showCompleted = true
                 )
                 binding.btnPrimaryAction.text = getString(R.string.btn_show_again)
+                binding.btnPrimaryAction.setBackgroundResource(R.drawable.bg_show_again_button)
             }
         }
     }
