@@ -124,6 +124,7 @@ class LauncherHomeActivity : AppCompatActivity() {
         setupDrawer()
         setupSwipeUpHint()
         setupFixIssueButton()
+        setupCheckWhatsappButton()
 
         val cached = cachedApps
         if (cached != null) {
@@ -481,6 +482,13 @@ class LauncherHomeActivity : AppCompatActivity() {
     private fun setupFixIssueButton() {
         binding.btnFixIssue.setOnClickListener {
             performFreshRestart()
+        }
+    }
+
+    private fun setupCheckWhatsappButton() {
+        // TODO: functionality decide baad mein karni hai — abhi ke liye non-functional hai.
+        binding.btnCheckWhatsappNow.setOnClickListener {
+            // Intentionally left blank for now.
         }
     }
 
