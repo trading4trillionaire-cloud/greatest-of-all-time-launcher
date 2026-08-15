@@ -486,9 +486,18 @@ class LauncherHomeActivity : AppCompatActivity() {
     }
 
     private fun setupCheckWhatsappButton() {
-        // TODO: functionality decide baad mein karni hai — abhi ke liye non-functional hai.
         binding.btnCheckWhatsappNow.setOnClickListener {
-            // Intentionally left blank for now.
+            val prefs = getSharedPreferences(WatchAdUnlockActivity.PREFS_NAME, Context.MODE_PRIVATE)
+            val lastUnlockTime = prefs.getLong(WatchAdUnlockActivity.KEY_LAST_UNLOCK_TIME, 0L)
+            val elapsed = System.currentTimeMillis() - lastUnlockTime
+
+            if (elapsed in 0 until WatchAdUnlockActivity.UNLOCK_WINDOW_MS) {
+                // Still within the unlock window — skip the ad, go straight to the content.
+                startActivity(Intent(this, UnlockedContentActivity::class.java))
+            } else {
+                // Window expired (or never unlocked) — needs to watch the ad again.
+                startActivity(Intent(this, WatchAdUnlockActivity::class.java))
+            }
         }
     }
 
