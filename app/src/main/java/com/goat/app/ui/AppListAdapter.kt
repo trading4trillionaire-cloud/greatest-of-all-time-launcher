@@ -21,8 +21,19 @@ data class AppEntry(
     val stableId: Long = (packageName + className).hashCode().toLong()
 }
 
+// Modification: app drawer ke icon aur label ka size — icon-ke-beech-ka-gap
+// (column ke andar left/right white space) ko target % tak laane ke liye
+// LauncherHomeActivity dono values ek sath (proportionally) badhata hai.
+// Ye sirf ek baar (per screen-width+column-count combination) calculate
+// hoke cache ho jaata hai, isliye baar baar recompute nahi karna padta.
+data class DrawerIconSizing(
+    val iconSizePx: Int,
+    val textSizeSp: Float
+)
+
 class AppListAdapter(
     private val apps: List<AppEntry>,
+    private val sizing: DrawerIconSizing,
     private val onAppClick: (AppEntry) -> Unit
 ) : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
 
@@ -39,7 +50,17 @@ class AppListAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_app, parent, false)
-        return ViewHolder(view)
+        val holder = ViewHolder(view)
+        // Modification: icon/label ka size sirf ek baar, jab holder create
+        // hota hai, apply hota hai (har bind pe nahi) — kyunki poore drawer
+        // mein sabhi items ka size same hota hai, isliye per-bind repeat
+        // karne ki zaroorat nahi (extra measure/layout cost bachta hai).
+        val iconParams = holder.icon.layoutParams
+        iconParams.width = sizing.iconSizePx
+        iconParams.height = sizing.iconSizePx
+        holder.icon.layoutParams = iconParams
+        holder.label.textSize = sizing.textSizeSp
+        return holder
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
