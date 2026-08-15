@@ -53,13 +53,12 @@
             android:gravity="bottom|center_horizontal"
             android:paddingStart="32dp"
             android:paddingEnd="32dp"
-            android:paddingBottom="20dp">
+            android:paddingBottom="76dp">
 
             <ImageView
                 android:id="@+id/ivWhatsappCheck"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
                 android:adjustViewBounds="true"
                 android:maxWidth="150dp"
                 android:maxHeight="150dp"
