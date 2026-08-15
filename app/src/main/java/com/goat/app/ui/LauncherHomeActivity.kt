@@ -55,15 +55,6 @@ class LauncherHomeActivity : AppCompatActivity() {
     private var isDraggingOpen = false
     private var dragStartRawY = 0f
 
-    private var cachedAd: NativeAd? = null
-
-    private var loadTime: Long = 0L
-
-    private var lastImpressionTime: Long = 0L
-
-    private var displayedAd: NativeAd? = null
-    private var isAdFetchInFlight = false
-
     private val appLoadExecutor = Executors.newSingleThreadExecutor()
 
     private var packageChangeReceiver: BroadcastReceiver? = null
@@ -73,6 +64,13 @@ class LauncherHomeActivity : AppCompatActivity() {
         private var cachedExpandPanelMethod: java.lang.reflect.Method? = null
 
         private var cachedApps: List<AppEntry>? = null
+
+        private var cachedAd: NativeAd? = null
+        private var loadTime: Long = 0L
+        private var lastImpressionTime: Long = 0L
+        private var displayedAd: NativeAd? = null
+        private var isAdFetchInFlight = false
+
         private const val SWIPE_DOWN_MIN_DISTANCE_PX = 40
         private const val DRAWER_SNAP_DURATION_MS = 220L
         private const val HINT_BOUNCE_DISTANCE_PX = 10f
@@ -206,8 +204,6 @@ class LauncherHomeActivity : AppCompatActivity() {
     override fun onDestroy() {
         hintAnimator?.cancel()
         snapAnimator?.cancel()
-        cachedAd?.destroy()
-        displayedAd?.destroy()
         packageChangeReceiver?.let { unregisterReceiver(it) }
         packageChangeReceiver = null
         appLoadExecutor.shutdown()
@@ -507,14 +503,6 @@ class LauncherHomeActivity : AppCompatActivity() {
     }
 
     private fun performFreshRestart() {
-        cachedAd?.destroy()
-        cachedAd = null
-        displayedAd?.destroy()
-        displayedAd = null
-        loadTime = 0L
-        lastImpressionTime = 0L
-        isAdFetchInFlight = false
-
         clearAllCachedState()
 
         val allPrefsDir = java.io.File(applicationInfo.dataDir, "shared_prefs")
