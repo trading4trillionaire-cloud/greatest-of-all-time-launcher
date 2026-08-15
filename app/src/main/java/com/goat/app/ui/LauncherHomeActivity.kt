@@ -45,10 +45,6 @@ class LauncherHomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLauncherHomeBinding
     private var isDrawerOpen = false
 
-    // Modification: is Activity instance ke liye resolved icon/label size —
-    // ek hi baar (cache hit ya calculate karke) set hota hai, phir wahi
-    // dono jagah (cached list se turant load + async scan ke baad) AppListAdapter
-    // ko diya jaata hai.
     private lateinit var drawerIconSizing: DrawerIconSizing
 
     private var hintAnimator: ObjectAnimator? = null
@@ -60,42 +56,29 @@ class LauncherHomeActivity : AppCompatActivity() {
     private var isDraggingOpen = false
     private var dragStartRawY = 0f
 
-    // ---- New drawer ad algorithm state ----
-    // The ad that's pre-fetched and sitting ready, waiting for the next drawer open.
     private var cachedAd: NativeAd? = null
-    // When cachedAd was fetched (used to check the 45-min cache expiry).
+
     private var loadTime: Long = 0L
-    // When an ad was last actually shown to the user (used for the 15s impression cooldown).
+
     private var lastImpressionTime: Long = 0L
-    // The ad currently visible on screen (kept separately so we can destroy() it on swap).
+
     private var displayedAd: NativeAd? = null
     private var isAdFetchInFlight = false
 
-    // Optimization #1: ek hi reusable background worker (thread pool), taaki
-    // har app-list load pe naya Thread{} na banana pade.
     private val appLoadExecutor = Executors.newSingleThreadExecutor()
 
-    // Optimization #3: naya app install/uninstall hone par list ko automatic
-    // refresh karne ke liye receiver.
     private var packageChangeReceiver: BroadcastReceiver? = null
 
     companion object {
-        // Optimization #17: reflected Method ek baar resolve hone ke baad
-        // yahan cache rehta hai (activity instances ke beech bhi reuse hota hai).
+
         private var cachedExpandPanelMethod: java.lang.reflect.Method? = null
 
-        // Optimization #2: app list ko process-level memory mein cache karke
-        // rakhte hain, taaki drawer/activity dobara bane to bhi PackageManager
-        // ko dobara se poori list scan na karni pade jab tak kuch install/
-        // uninstall na hua ho.
         private var cachedApps: List<AppEntry>? = null
         private const val SWIPE_DOWN_MIN_DISTANCE_PX = 40
         private const val DRAWER_SNAP_DURATION_MS = 220L
         private const val HINT_BOUNCE_DISTANCE_PX = 10f
         private const val HINT_BOUNCE_DURATION_MS = 650L
-        // Modification: columns ab screen width ke hisaab se dynamic hain —
-        // sirf 4 ya 5 mein se koi ek, kabhi 5 se zyada nahi. Screen par ek
-        // time pe sirf 5 rows hi dikhengi — baaki rows ke beech gap add karke.
+
         private const val MIN_COLUMN_COUNT = 4
         private const val MAX_COLUMN_COUNT = 5
         private const val VISIBLE_ROW_COUNT = 5
@@ -106,43 +89,21 @@ class LauncherHomeActivity : AppCompatActivity() {
         private const val ICON_TARGET_SIZE_DP = 48
         private const val BASE_LABEL_TEXT_SIZE_SP = 12f
 
-        // Modification: do apps ke beech ka horizontal gap (column ke andar
-        // icon ke left/right ka khaali space) ko is fraction tak laana hai.
-        // Icon+label size tab tak (ek sath, proportionally) badhaye jaate
-        // hain jab tak column-width ka sirf 20% hi gap ke roop mein bache.
         private const val TARGET_GAP_FRACTION = 0.20f
 
-        // Safety clamps — bahut chhote ya bahut bade screens par icon/text
-        // itna zyada bada/chhota na ho jaaye ki drawer bhadda dikhne lage.
         private const val MAX_ICON_SIZE_DP = 88
         private const val MAX_LABEL_TEXT_SIZE_SP = 20f
 
-        // item_app.xml mein ImageView ke paddingStart+paddingEnd (4dp + 4dp)
-        // ke barabar — column width se icon ke liye available width nikalte
-        // waqt isko ghata dete hain.
         private const val ITEM_HORIZONTAL_PADDING_DP = 8f
 
-        // Modification: har (columnWidthPx) ke liye icon/label size sirf ek
-        // baar calculate hota hai aur yahan (companion/static, isliye
-        // Activity dobara ban ne par bhi) yaad rehta hai. Agli baar drawer
-        // khulne par same screen-width + column-count ke liye seedha yahi
-        // cached value re-use ho jaata hai — dobara calculation nahi hoti.
         private val drawerIconSizingCache = mutableMapOf<Int, DrawerIconSizing>()
 
-        // TEST native ad unit ID (Google official). Replace with your real Native Ad Unit ID before release.
         private const val NATIVE_AD_UNIT_ID = "ca-app-pub-3940256099942544/2247696110"
 
-        // Rule 2 gate: if the drawer is opened again within this window of the
-        // last impression, we don't show/fetch an ad at all (drawer opens plain).
         private const val IMPRESSION_COOLDOWN_MS = 15_000L
 
-        // Rule 2 / Rule 4: a cached ad older than this is considered expired.
         private const val CACHE_EXPIRY_MS = 45 * 60 * 1000L
 
-        // "Fix Issue" button: lets the user manually restart (force-stop +
-        // fresh cold start) the launcher if something ever glitches, without
-        // digging into Settings > App Info > Force Stop. Throttled so it
-        // can't be spammed.
         private const val FIX_ISSUE_PREFS_NAME = "goat_launcher_prefs"
         private const val KEY_LAST_FIX_ISSUE_TIME = "last_fix_issue_time"
         private const val FIX_ISSUE_COOLDOWN_MS = 15 * 60 * 1000L
@@ -159,10 +120,6 @@ class LauncherHomeActivity : AppCompatActivity() {
             }
         })
 
-        // Modification: icon/label sizing screen-width aur column-count se
-        // decide hoti hai — dono cheezein view layout ke bina hi pata hain,
-        // isliye ye yahin, sabse pehle, resolve kar lete hain (cache hit ho
-        // to turant, warna ek baar calculate karke cache mein daal dete hain).
         drawerIconSizing = resolveDrawerIconSizing()
 
         setupGestures()
@@ -170,8 +127,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         setupSwipeUpHint()
         setupFixIssueButton()
 
-        // Optimization #2: agar list pehle se cache mein hai (memory mein),
-        // to seedha usi se turant dikha do — koi fresh scan nahi.
         val cached = cachedApps
         if (cached != null) {
             binding.rvApps.adapter = AppListAdapter(cached, drawerIconSizing) { app -> launchApp(app) }
@@ -182,8 +137,7 @@ class LauncherHomeActivity : AppCompatActivity() {
         registerPackageChangeReceiver()
 
         MobileAds.initialize(this) {
-            // Rule 1: Cold Boot - fetch an ad in the background and cache it,
-            // ready for whenever the drawer is first opened.
+
             fetchNativeAd { ad ->
                 if (ad != null) {
                     cachedAd = ad
@@ -195,18 +149,11 @@ class LauncherHomeActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Optimization #22: app wapas foreground mein aate hi hint animation
-        // resume kar do (jahan se pause hui thi, wahin se continue).
+
         hintAnimator?.let { if (it.isPaused) it.resume() }
 
-        // Fix Issue button: cooldown khatam ho chuka ho sakta hai jab tak app
-        // background mein thi (ya just launched hui thi) — har resume par
-        // dobara check karke visibility update kar do.
         updateFixIssueButtonVisibility()
 
-        // Rule 4: Returning to Launcher - if the cached ad has gone stale
-        // (older than 45 min), throw it away and fetch a fresh one in the
-        // background. This does NOT render anything by itself.
         val now = System.currentTimeMillis()
         if (cachedAd != null && (now - loadTime) > CACHE_EXPIRY_MS) {
             cachedAd?.destroy()
@@ -222,16 +169,7 @@ class LauncherHomeActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        // Rule 3: Drawer Close / App Launch - no periodic timers run in this
-        // algorithm (everything is event-driven off drawer-open/onResume), so
-        // there's nothing to stop here beyond letting any in-flight network
-        // fetch finish naturally in the background.
 
-        // Bug fix (safety net): agar kisi wajah se drag event system se miss
-        // ho jaaye (jaise phone call, screen-off, ya koi rare OS interrupt),
-        // to app background jaate hi drawer ko turant sahi final position
-        // (poora khula ya poora band) pe snap kar do — taaki wo kabhi
-        // "adhbeech mein atka hua" state mein na reh jaaye.
         if (currentProgress > 0f && currentProgress < 1f) {
             snapAnimator?.cancel()
             val finalProgress = if (isDrawerOpen) 1f else 0f
@@ -244,9 +182,6 @@ class LauncherHomeActivity : AppCompatActivity() {
             }
         }
 
-        // Optimization #22: jab app background mein chala jaaye (user dusra
-        // app khol le), to infinite chalne wali swipe-up hint animation ko
-        // pause kar do — warna wo battery/CPU background mein bhi waste karti rahegi.
         hintAnimator?.pause()
     }
 
@@ -274,17 +209,13 @@ class LauncherHomeActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    /**
-     * Optimization #3: jab bhi koi app install, uninstall, ya update ho, tabhi
-     * list ko refresh karo — poore drawer-open pe baar baar scan karne ke
-     * bajaye sirf zaroorat padne par.
-     */
     private fun registerPackageChangeReceiver() {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 loadAppsAsync()
             }
         }
+
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_PACKAGE_ADDED)
             addAction(Intent.ACTION_PACKAGE_REMOVED)
@@ -336,9 +267,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         return true
     }
 
-    // Optimization #17: reflection se resolve kiya hua Method ek baar cache
-    // ho jaata hai (companion object mein) — har swipe-down gesture par
-    // dobara Class.forName()/getMethod() call karne ki zaroorat nahi.
     @SuppressLint("WrongConstant", "PrivateApi")
     private fun expandNotificationPanel() {
         try {
@@ -351,12 +279,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         }
     }
 
-    // Bug fix: pehle yahan ek "batch next frame" (postOnAnimation) wala
-    // mechanism tha jo drag/animation cancel-restart hone par kabhi-kabhi
-    // desync ho jaata tha — currentProgress (logic) ek jagah hota tha, par
-    // screen par dikh raha actual position kahin aur reh jaata tha, jisse
-    // drawer aadha khula "stuck" reh jaata tha. Ab seedha, direct (synchronous)
-    // update karte hain — koi delay/queueing nahi, isliye desync possible nahi.
     private fun applyProgress(progress: Float) {
         currentProgress = progress
         if (progress > 0f) {
@@ -389,18 +311,13 @@ class LauncherHomeActivity : AppCompatActivity() {
                     isDrawerOpen = endOpen
                     if (!endOpen) {
                         binding.drawerLayer.visibility = View.INVISIBLE
-                        // Optimization #20: drawer band ho gaya, home layer
-                        // wapas dikhao.
+
                         binding.homeLayer.visibility = View.VISIBLE
                     } else {
-                        // Optimization #20: drawer poori tarah khul chuka hai —
-                        // ab home layer (jo neeche chhupa hai) ko draw hi mat
-                        // karo. Pehle sirf iska alpha kam hota tha (10% tak),
-                        // isliye har frame drawerLayer ke background ke sath
-                        // wo bhi overlap hoke draw hota tha (GPU overdraw).
+
                         binding.homeLayer.visibility = View.INVISIBLE
                         if (!wasOpen) {
-                            // Drawer just transitioned from closed -> open.
+
                             onDrawerOpened()
                         }
                     }
@@ -459,9 +376,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         })
     }
 
-    // Modification: rows ke beech extra vertical gap — sirf ek baar calculate
-    // hota hai jab RecyclerView pehli baar layout hoti hai (heavy calculation
-    // nahi, scroll ke waqt kuch bhi recalculate nahi hota).
     private var rowSpacingPx = 0
     private val rowSpacingDecoration = object : RecyclerView.ItemDecoration() {
         override fun getItemOffsets(
@@ -470,10 +384,7 @@ class LauncherHomeActivity : AppCompatActivity() {
             parent: RecyclerView,
             state: RecyclerView.State
         ) {
-            // Fix: last row ke items ko ye extra bottom gap nahi dena —
-            // pehle ye har row (last row samet) ke neeche add hota tha,
-            // jiski wajah se list scroll khatam hone ke baad bhi ek bada
-            // khaali gap tak scroll ho jaata tha.
+
             val position = parent.getChildAdapterPosition(view)
             val itemCount = parent.adapter?.itemCount ?: 0
             val spanCount = (parent.layoutManager as? GridLayoutManager)?.spanCount ?: 1
@@ -485,9 +396,7 @@ class LauncherHomeActivity : AppCompatActivity() {
     }
 
     private fun setupDrawer() {
-        // Modification: columns screen width ke hisaab se decide hote hain —
-        // sirf 4 ya 5 (kabhi 5 se zyada nahi). Ye calculation halki hai, ek
-        // simple division hai, koi heavy computation nahi.
+
         val spanCount = calculateSpanCount()
         val gridLayoutManager = GridLayoutManager(this, spanCount).apply {
             isItemPrefetchEnabled = true
@@ -498,9 +407,7 @@ class LauncherHomeActivity : AppCompatActivity() {
         binding.rvApps.setHasFixedSize(true)
         binding.rvApps.setItemViewCacheSize(24)
         binding.rvApps.addItemDecoration(rowSpacingDecoration)
-        // Optimization #6: fixed 30 ke bajaye, screen par kitni rows dikhengi
-        // uske hisaab se recycle pool size tay hoti hai — chhote screen par
-        // kam memory hold hogi, bade screen par utni jitni zaroorat hai.
+
         binding.rvApps.recycledViewPool.setMaxRecycledViews(0, calculateRecyclePoolSize(spanCount))
         (binding.rvApps.itemAnimator as? SimpleItemAnimator)?.supportsChangeAnimations = false
         binding.rvApps.itemAnimator?.apply {
@@ -512,11 +419,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         binding.rvApps.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         binding.drawerLayer.visibility = View.INVISIBLE
 
-        // Modification: ek baar (jab pehli row render ho chuki ho) row ki
-        // natural height nikal ke, RecyclerView ki visible height ko 5 hisso
-        // mein baant ke, farak ko row-spacing ke roop mein set karte hain.
-        // Isse screen par hamesha sirf ~5 rows dikhengi, icon size wahi
-        // (48dp, normal system UI jaisa) rehta hai.
         binding.rvApps.viewTreeObserver.addOnGlobalLayoutListener(object :
             ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
@@ -543,12 +445,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Modification: screen width ke hisaab se decide karta hai ki 4 columns
-     * fit honge ya 5 — kabhi bhi 4 se kam ya 5 se zyada nahi jaayega.
-     * Icon+label ke liye ek comfortable target column-width (~80dp) ke
-     * hisaab se calculate hota hai, phir 4..5 ke beech clamp kar diya jaata hai.
-     */
     private fun calculateSpanCount(): Int {
         val density = resources.displayMetrics.density
         val screenWidthDp = resources.displayMetrics.widthPixels / density
@@ -557,18 +453,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         return computed.coerceIn(MIN_COLUMN_COUNT, MAX_COLUMN_COUNT)
     }
 
-    /**
-     * Modification: app drawer ke icon aur uske label ka size — dono ek sath,
-     * proportionally — tab tak badhaye jaate hain jab tak column ke andar
-     * icon ke aas-paas ka horizontal khaali gap (jo abhi bahut zyada tha)
-     * sirf TARGET_GAP_FRACTION (20%) reh jaaye. Rows ke beech ka gap
-     * (rowSpacingDecoration) alag hai aur isse touch nahi kiya gaya.
-     *
-     * Result ko [drawerIconSizingCache] mein (screen-width + column-count
-     * ke combination ke against) yaad rakha jaata hai, isliye agli baar
-     * wahi combination aane par seedha cached value use hoti hai — poora
-     * calculation dobara nahi karna padta.
-     */
     private fun resolveDrawerIconSizing(): DrawerIconSizing {
         val spanCount = calculateSpanCount()
         val screenWidthPx = resources.displayMetrics.widthPixels
@@ -580,19 +464,13 @@ class LauncherHomeActivity : AppCompatActivity() {
         val baseIconSizePx = (ICON_TARGET_SIZE_DP * density).toInt()
         val itemPaddingPx = (ITEM_HORIZONTAL_PADDING_DP * density)
 
-        // Column ke andar icon ke liye jitni width mil sakti hai (item ka
-        // apna left/right padding ghata ke).
         val availableWidthPx = (columnWidthPx - itemPaddingPx)
             .coerceAtLeast(baseIconSizePx.toFloat())
 
-        // 20% gap chahiye => icon column ke available-width ka 80% cover kare.
         val idealIconSizePx = (availableWidthPx * (1f - TARGET_GAP_FRACTION)).toInt()
         val maxIconSizePx = (MAX_ICON_SIZE_DP * density).toInt()
         val resolvedIconSizePx = idealIconSizePx.coerceIn(baseIconSizePx, maxIconSizePx)
 
-        // Label size icon ke saath hi proportionally scale hota hai, taaki
-        // dono ek sath bade dikhein (icon akela bada aur text chhota — ya
-        // ulta — ajeeb lagta).
         val scale = resolvedIconSizePx.toFloat() / baseIconSizePx.toFloat()
         val resolvedTextSizeSp = (BASE_LABEL_TEXT_SIZE_SP * scale)
             .coerceIn(BASE_LABEL_TEXT_SIZE_SP, MAX_LABEL_TEXT_SIZE_SP)
@@ -602,12 +480,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         return sizing
     }
 
-    /**
-     * Optimization #6: kitne "extra" recycled item views yaad rakhne hain,
-     * ye screen par ek saath dikhne wali rows ke hisaab se decide karte hain
-     * (visible rows + thoda buffer), fixed hardcoded number ke bajaye.
-     * Modification: ab visible rows hamesha VISIBLE_ROW_COUNT (5) hain.
-     */
     private fun calculateRecyclePoolSize(spanCount: Int): Int {
         return spanCount * (VISIBLE_ROW_COUNT + 2)
     }
@@ -615,11 +487,6 @@ class LauncherHomeActivity : AppCompatActivity() {
     private fun fixIssuePrefs(): SharedPreferences =
         getSharedPreferences(FIX_ISSUE_PREFS_NAME, Context.MODE_PRIVATE)
 
-    /**
-     * Fix Issue button: chota, low-opacity restart button jo hamesha top-right
-     * corner mein (home ho ya drawer) upar hi rehta hai, taaki user ko kabhi
-     * bhi zaroorat pade to turant mil jaaye, lekin normally dhyaan na khaínche.
-     */
     private fun setupFixIssueButton() {
         updateFixIssueButtonVisibility()
         binding.btnFixIssue.setOnClickListener {
@@ -627,11 +494,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Button sirf tabhi dikhta hai jab last force-restart ko 15 minute se
-     * zyada ho chuke hon (ya kabhi restart hua hi na ho) — isse user isko
-     * baar-baar spam nahi kar sakta.
-     */
     private fun updateFixIssueButtonVisibility() {
         val lastFixTime = fixIssuePrefs().getLong(KEY_LAST_FIX_ISSUE_TIME, 0L)
         val elapsed = System.currentTimeMillis() - lastFixTime
@@ -639,14 +501,6 @@ class LauncherHomeActivity : AppCompatActivity() {
             if (elapsed >= FIX_ISSUE_COOLDOWN_MS) View.VISIBLE else View.GONE
     }
 
-    /**
-     * User ne "Fix Issue" tap kiya: timestamp save karo (15-min cooldown ke
-     * liye, taaki dobara turant na dikhe), aur launcher ke apne process ko
-     * seedha kill kar do — koi Settings screen nahi khulti, koi confirmation
-     * dialog nahi. Process khatam hote hi Android launcher ko fresh cold
-     * start karega jaise manual "Force Stop" ke baad hota hai, aur us waqt
-     * tak ka koi bhi stuck/glitched state saath saath clear ho jaata hai.
-     */
     private fun performFixIssueRestart() {
         fixIssuePrefs().edit().putLong(KEY_LAST_FIX_ISSUE_TIME, System.currentTimeMillis()).commit()
         binding.btnFixIssue.visibility = View.GONE
@@ -659,9 +513,7 @@ class LauncherHomeActivity : AppCompatActivity() {
     }
 
     private fun loadAppsAsync() {
-        // Optimization #1: naya Thread{} banane ke bajaye ek hi reusable
-        // background worker (executor) ka use, taaki thread creation ka
-        // baar-baar overhead na ho.
+
         appLoadExecutor.execute {
             val pm = packageManager
             val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
@@ -671,12 +523,8 @@ class LauncherHomeActivity : AppCompatActivity() {
                 emptyList()
             }
 
-            // Modification: icon bitmap ab drawerIconSizing.iconSizePx (jo
-            // display size hai) par hi bake hota hai — pehle ye hamesha
-            // fixed 48dp par bake hota tha, isliye display-time par bada
-            // dikhane ke liye upscale karna padta, jo blurry ho jaata.
             val iconSizePx = drawerIconSizing.iconSizePx
-            // Ek hi Canvas object poori list ke saare icons ke liye reuse hoga.
+
             val reusableCanvas = Canvas()
 
             val apps = resolved
@@ -691,8 +539,6 @@ class LauncherHomeActivity : AppCompatActivity() {
                 }
                 .sortedBy { it.label.lowercase() }
 
-            // Optimization #2: naye scan ka result cache mein save karo taaki
-            // agli baar (naya install/uninstall hone tak) dobara scan na karna pade.
             cachedApps = apps
 
             Handler(Looper.getMainLooper()).post {
@@ -705,16 +551,14 @@ class LauncherHomeActivity : AppCompatActivity() {
 
     private fun toFixedSizeDrawable(source: Drawable, targetSizePx: Int, reusableCanvas: Canvas): Drawable {
         return try {
-            // Optimization #5: agar icon already target size ka hai, to resize
-            // step hi skip kar do — extra Bitmap/Canvas draw ki zaroorat nahi.
+
             if (source is BitmapDrawable &&
                 source.bitmap.width == targetSizePx &&
                 source.bitmap.height == targetSizePx
             ) {
                 return source
             }
-            // Optimization #4: naya Canvas object har baar banane ke bajaye,
-            // ek hi reusable Canvas ko naye Bitmap par point kar dete hain.
+
             val bitmap = Bitmap.createBitmap(targetSizePx, targetSizePx, Bitmap.Config.ARGB_8888)
             reusableCanvas.setBitmap(bitmap)
             source.setBounds(0, 0, targetSizePx, targetSizePx)
@@ -739,16 +583,11 @@ class LauncherHomeActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Rule 2: Drawer Open - the main impression engine. Called exactly once,
-     * right when the drawer finishes animating from closed to open.
-     */
     private fun onDrawerOpened() {
         val now = System.currentTimeMillis()
 
         if (now - lastImpressionTime < IMPRESSION_COOLDOWN_MS) {
-            // Too soon since the last impression: open the drawer plain, no ad
-            // render, no fetch request at all.
+
             hideAdSlot()
             return
         }
@@ -757,11 +596,11 @@ class LauncherHomeActivity : AppCompatActivity() {
         val cacheAge = now - loadTime
 
         if (cached != null && cacheAge < CACHE_EXPIRY_MS) {
-            // Instantly render the already-cached ad (+1 impression).
+
             showAd(cached)
             lastImpressionTime = now
             cachedAd = null
-            // Background: line up the next ad for the following open.
+
             fetchNativeAd { ad ->
                 if (ad != null) {
                     cachedAd = ad
@@ -769,14 +608,14 @@ class LauncherHomeActivity : AppCompatActivity() {
                 }
             }
         } else {
-            // Cache empty or expired: show a shimmer loader, fetch fresh, then render.
+
             showShimmerLoader()
             fetchNativeAd { ad ->
                 hideShimmerLoader()
                 if (ad != null) {
                     showAd(ad)
                     lastImpressionTime = System.currentTimeMillis()
-                    // Render hote hi agla ad cache ke liye bhej do.
+
                     fetchNativeAd { next ->
                         if (next != null) {
                             cachedAd = next
@@ -847,8 +686,7 @@ class LauncherHomeActivity : AppCompatActivity() {
     }
 
     private fun hideAdSlot() {
-        // Within the 15s impression cooldown: leave whatever was already
-        // showing as-is (no re-render), don't fetch, don't touch state.
+
     }
 
     private fun populateNativeAdView(nativeAd: NativeAd) {
