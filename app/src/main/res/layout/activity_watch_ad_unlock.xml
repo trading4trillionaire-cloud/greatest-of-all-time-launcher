@@ -55,6 +55,23 @@
             android:clickable="true"
             android:focusable="true" />
 
+        <TextView
+            android:id="@+id/btnNoThanks"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/no_thanks_button_text"
+            android:textColor="@color/home_button_text"
+            android:textSize="13sp"
+            android:alpha="0.55"
+            android:textAllCaps="false"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:clickable="true"
+            android:focusable="true" />
+
     </LinearLayout>
 
 </FrameLayout>
