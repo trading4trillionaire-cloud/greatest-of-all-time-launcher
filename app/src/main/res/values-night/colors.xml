@@ -18,4 +18,6 @@
     <color name="fix_issue_text">#F1F5F3</color>
 
     <color name="whatsapp_icon_bg">#25D366</color>
+    <color name="label_safe_color">#3DDC84</color>
+    <color name="label_risk_color">#FF6B6B</color>
 </resources>
