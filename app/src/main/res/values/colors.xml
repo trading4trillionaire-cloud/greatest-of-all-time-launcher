@@ -19,7 +19,4 @@
 
     <color name="drawer_handle">#33000000</color>
 
-    <color name="fix_issue_bg">#33000000</color>
-    <color name="fix_issue_icon">#F1F5F3</color>
-
 </resources>
