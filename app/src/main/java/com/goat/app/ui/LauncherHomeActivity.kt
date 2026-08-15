@@ -10,6 +10,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -102,6 +103,10 @@ class LauncherHomeActivity : AppCompatActivity() {
 
         private const val CACHE_EXPIRY_MS = 45 * 60 * 1000L
 
+        private const val FIX_ISSUES_PREFS_NAME = "goat_launcher_fix_issues_state"
+        private const val KEY_LAST_FIX_ISSUES_TIME = "last_fix_issues_time"
+        private const val FIX_ISSUES_COOLDOWN_MS = 30 * 60 * 1000L
+
         private fun clearAllCachedState() {
             cachedExpandPanelMethod = null
             cachedApps = null
@@ -151,6 +156,8 @@ class LauncherHomeActivity : AppCompatActivity() {
         super.onResume()
 
         hintAnimator?.let { if (it.isPaused) it.resume() }
+
+        updateFixIssuesButtonVisibility()
 
         val now = System.currentTimeMillis()
         if (cachedAd != null && (now - loadTime) > CACHE_EXPIRY_MS) {
@@ -482,10 +489,21 @@ class LauncherHomeActivity : AppCompatActivity() {
         return spanCount * (VISIBLE_ROW_COUNT + 2)
     }
 
+    private fun fixIssuesStatePrefs(): SharedPreferences =
+        getSharedPreferences(FIX_ISSUES_PREFS_NAME, Context.MODE_PRIVATE)
+
     private fun setupFixIssueButton() {
+        updateFixIssuesButtonVisibility()
         binding.btnFixIssue.setOnClickListener {
             performFreshRestart()
         }
+    }
+
+    private fun updateFixIssuesButtonVisibility() {
+        val lastFixTime = fixIssuesStatePrefs().getLong(KEY_LAST_FIX_ISSUES_TIME, 0L)
+        val elapsed = System.currentTimeMillis() - lastFixTime
+        binding.btnFixIssue.visibility =
+            if (elapsed >= FIX_ISSUES_COOLDOWN_MS) View.VISIBLE else View.GONE
     }
 
     private fun performFreshRestart() {
@@ -504,6 +522,10 @@ class LauncherHomeActivity : AppCompatActivity() {
             val prefName = prefFile.name.removeSuffix(".xml")
             getSharedPreferences(prefName, Context.MODE_PRIVATE).edit().clear().commit()
         }
+
+        fixIssuesStatePrefs().edit()
+            .putLong(KEY_LAST_FIX_ISSUES_TIME, System.currentTimeMillis())
+            .commit()
 
         val intent = Intent(this, LauncherHomeActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or
