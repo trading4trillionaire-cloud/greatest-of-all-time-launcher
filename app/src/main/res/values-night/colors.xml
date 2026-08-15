@@ -13,4 +13,7 @@
     <color name="launcher_gradient_end">#2A5CD8</color>
 
     <color name="drawer_handle">#33FFFFFF</color>
+
+    <color name="fix_issue_bg">#33FFFFFF</color>
+    <color name="fix_issue_text">#F1F5F3</color>
 </resources>
