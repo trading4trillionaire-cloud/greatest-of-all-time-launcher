@@ -22,8 +22,6 @@
     <color name="fix_issue_bg">#33000000</color>
     <color name="fix_issue_text">#F1F5F3</color>
 
-    <color name="whatsapp_alert_accent">#FFC857</color>
     <color name="whatsapp_icon_bg">#25D366</color>
-    <color name="check_now_button_bg">#25D366</color>
 
 </resources>
