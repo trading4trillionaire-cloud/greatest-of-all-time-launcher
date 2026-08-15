@@ -162,11 +162,6 @@
 
     </LinearLayout>
 
-    <!-- Fix Issue: small, low-attention restart button. Sits above both the
-         home layer and the drawer layer (last child = drawn/touched on top
-         in this FrameLayout), so it stays reachable no matter which screen
-         the user is on. Kept intentionally small and translucent so it
-         doesn't grab attention unless the user is actually looking for it. -->
     <ImageButton
         android:id="@+id/btnFixIssue"
         android:layout_width="30dp"
