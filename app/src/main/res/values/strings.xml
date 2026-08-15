@@ -14,4 +14,14 @@
     <string name="watch_ad_title_line2">Unlock for 3 Hours</string>
     <string name="continue_button_text">Continue</string>
     <string name="no_thanks_button_text">No Thanks</string>
+
+    <string name="step_title_format">Step %1$d</string>
+    <string name="how_to_fix_title">How to Fix</string>
+    <string name="label_safe">Safe</string>
+    <string name="label_risk">Risk</string>
+    <string name="btn_next_step">Next Step</string>
+    <string name="btn_next_step_how_to_fix">Next Step : How to Fix</string>
+    <string name="btn_next">Next</string>
+    <string name="btn_show_again">Show Again</string>
+    <string name="completed_label">Completed ✅</string>
 </resources>
