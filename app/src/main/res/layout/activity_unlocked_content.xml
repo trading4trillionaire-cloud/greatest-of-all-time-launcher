@@ -57,16 +57,22 @@
 
                     <TextView
                         android:id="@+id/tvSafeLabel"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
                         android:gravity="center"
+                        android:background="@drawable/bg_label_capsule"
                         android:text="@string/label_safe"
                         android:textColor="@color/label_safe_color"
                         android:textStyle="bold"
                         android:textAllCaps="true"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
                         android:letterSpacing="0.05"
-                        android:paddingBottom="8dp" />
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        android:layout_marginBottom="4dp" />
 
                     <ImageView
                         android:id="@+id/ivSafeImage"
@@ -87,16 +93,22 @@
 
                     <TextView
                         android:id="@+id/tvRiskLabel"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
                         android:gravity="center"
+                        android:background="@drawable/bg_label_capsule"
                         android:text="@string/label_risk"
                         android:textColor="@color/label_risk_color"
                         android:textStyle="bold"
                         android:textAllCaps="true"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
                         android:letterSpacing="0.05"
-                        android:paddingBottom="8dp" />
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        android:layout_marginBottom="4dp" />
 
                     <ImageView
                         android:id="@+id/ivRiskImage"
@@ -128,16 +140,18 @@
             android:id="@+id/btnPrimaryAction"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_check_now_button"
+            android:background="@drawable/bg_primary_action_button"
             android:text="@string/btn_next_step"
-            android:textColor="@color/home_button_text"
+            android:textColor="@color/text_on_primary"
             android:textSize="15sp"
+            android:textStyle="bold"
             android:textAllCaps="false"
             android:gravity="center"
             android:paddingTop="14dp"
             android:paddingBottom="14dp"
             android:clickable="true"
-            android:focusable="true" />
+            android:focusable="true"
+            android:elevation="4dp" />
 
     </LinearLayout>
 
