@@ -56,7 +56,6 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("com.google.android.gms:play-services-ads:23.6.0")
-    // Optimization #19: item_app.xml ab ConstraintLayout use karta hai (extra
-    // LinearLayout nesting hataane ke liye)
+
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 }
