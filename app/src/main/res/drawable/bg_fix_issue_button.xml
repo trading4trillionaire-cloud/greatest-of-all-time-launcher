@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Subtle translucent circular pill for the Fix Issue button — meant to
-     blend into the corner and only stand out when the user actually looks
-     for it, not draw attention on its own. -->
+
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
     <solid android:color="@color/fix_issue_bg" />
