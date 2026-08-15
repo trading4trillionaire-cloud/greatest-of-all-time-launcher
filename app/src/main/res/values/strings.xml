@@ -4,6 +4,5 @@
     <string name="all_apps_hint">Show Apps</string>
     <string name="sponsored_label">Sponsored</string>
     <string name="no_sponsorship_available">No sponsorship available</string>
-    <string name="fix_issue">Fix Issue</string>
     <string name="fix_issue_content_description">Fix Issue</string>
 </resources>
