@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_home_gradient">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingStart="40dp"
+        android:paddingEnd="40dp">
+
+        <TextView
+            android:id="@+id/tvWatchAdLine1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/watch_ad_title_line1"
+            android:textColor="@color/home_button_text"
+            android:textSize="20sp"
+            android:fontFamily="sans-serif"
+            android:letterSpacing="0.02" />
+
+        <TextView
+            android:id="@+id/tvWatchAdLine2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:text="@string/watch_ad_title_line2"
+            android:textColor="@color/home_button_text"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:textAllCaps="true"
+            android:fontFamily="sans-serif"
+            android:letterSpacing="0.03" />
+
+        <TextView
+            android:id="@+id/btnContinue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/bg_check_now_button"
+            android:text="@string/continue_button_text"
+            android:textColor="@color/home_button_text"
+            android:textSize="14sp"
+            android:textAllCaps="false"
+            android:paddingStart="34dp"
+            android:paddingEnd="34dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+
+</FrameLayout>
