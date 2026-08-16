@@ -107,6 +107,11 @@
             android:paddingEnd="24dp"
             android:paddingBottom="40dp">
 
+            <FrameLayout
+                android:id="@+id/featureCardStack"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
             <LinearLayout
                 android:id="@+id/whatsappGuideCard"
                 android:layout_width="match_parent"
@@ -192,6 +197,95 @@
                     android:focusable="true" />
 
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/callGuideCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_whatsapp_guide_card"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:paddingTop="18dp"
+                android:paddingBottom="18dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:id="@+id/ivCallCheck"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_call_guide"
+                        android:contentDescription="@string/calls_guide_title" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="14dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvCallCheckTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/calls_guide_title"
+                            android:textColor="@color/guide_card_title_text"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:fontFamily="sans-serif" />
+
+                        <TextView
+                            android:id="@+id/tvCallCheckSubtitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/calls_guide_status_free_access"
+                            android:textColor="@color/guide_card_subtitle_text"
+                            android:textSize="13sp"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:fontFamily="sans-serif" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="14dp"
+                    android:background="@color/guide_card_divider" />
+
+                <TextView
+                    android:id="@+id/btnCheckCallNow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_view_guide_button"
+                    android:text="@string/whatsapp_guide_button_view"
+                    android:textColor="@color/guide_card_button_text"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textAllCaps="false"
+                    android:gravity="center"
+                    android:paddingTop="13dp"
+                    android:paddingBottom="13dp"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+            </LinearLayout>
+
+            </FrameLayout>
 
             <LinearLayout
                 android:id="@+id/featuresNavRow"
