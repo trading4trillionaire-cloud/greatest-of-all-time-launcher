@@ -60,4 +60,9 @@
     <color name="progress_dot_inactive">#40FFFFFF</color>
     <color name="guide_step_eyebrow">#25D366</color>
 
+    <!-- Charging ring -->
+    <color name="charging_ring_track">#26FFFFFF</color>
+    <color name="charging_ring_progress">#25D366</color>
+    <color name="charging_ring_glow">#25D366</color>
+
 </resources>
