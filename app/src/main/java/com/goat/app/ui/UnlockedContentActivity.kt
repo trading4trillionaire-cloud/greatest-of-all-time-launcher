@@ -25,7 +25,7 @@ class UnlockedContentActivity : AppCompatActivity() {
 
     companion object {
         private const val ASSET_FOLDER = "whatsapp-1-images"
-        private const val TOTAL_STEPS = 5 // indices 0..4
+        private const val TOTAL_STEPS = 5
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
