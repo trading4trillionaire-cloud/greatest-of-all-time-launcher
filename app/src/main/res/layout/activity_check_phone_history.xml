@@ -83,12 +83,20 @@
 
         <TextView
             android:id="@+id/tvPhoneHistoryTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
             android:text="@string/phone_history_title"
             android:textColor="@color/home_button_text"
-            android:textSize="20sp"
+            android:textSize="34sp"
             android:textStyle="bold"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="20sp"
+            android:autoSizeMaxTextSize="34sp"
+            android:maxLines="1"
+            android:gravity="center"
             android:fontFamily="sans-serif"
             android:letterSpacing="0.02" />
 
@@ -180,6 +188,16 @@
         </androidx.core.widget.NestedScrollView>
 
     </LinearLayout>
+
+    <!-- Loading spinner shown while usage history is being fetched (first load only) -->
+    <ProgressBar
+        android:id="@+id/progressHistoryLoading"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminateTint="@android:color/white"
+        android:visibility="gone" />
 
     <!-- Back button — shared across both the permission and content screens -->
     <ImageView
