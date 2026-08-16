@@ -194,6 +194,7 @@
                         android:layout_width="0dp"
                         android:layout_height="1.5dp"
                         android:layout_weight="1"
+                        android:layerType="software"
                         android:background="@drawable/bg_dashed_line" />
 
                     <TextView
@@ -214,6 +215,7 @@
                         android:layout_width="0dp"
                         android:layout_height="1.5dp"
                         android:layout_weight="1"
+                        android:layerType="software"
                         android:background="@drawable/bg_dashed_line" />
 
                 </LinearLayout>
