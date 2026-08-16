@@ -60,31 +60,47 @@ class UnlockedContentActivity : AppCompatActivity() {
 
     private fun renderStep() {
         binding.btnPrimaryAction.setBackgroundResource(R.drawable.bg_primary_action_button)
+        updateProgressDots()
+        binding.tvStepEyebrow.text = getString(R.string.guide_step_of_format, currentStep + 1, TOTAL_STEPS)
 
         when (currentStep) {
             0 -> {
-                showSingleImageStep(title = getString(R.string.step_title_format, 1), asset = "1.jpg")
+                showSingleImageStep(
+                    title = getString(R.string.guide_step1_title),
+                    body = getString(R.string.guide_step1_body),
+                    asset = "1.jpg"
+                )
                 binding.btnPrimaryAction.text = getString(R.string.btn_next_step)
             }
             1 -> {
-                showSingleImageStep(title = getString(R.string.step_title_format, 2), asset = "2.jpg")
+                showSingleImageStep(
+                    title = getString(R.string.guide_step2_title),
+                    body = getString(R.string.guide_step2_body),
+                    asset = "2.jpg"
+                )
                 binding.btnPrimaryAction.text = getString(R.string.btn_next_step)
             }
             2 -> {
                 showCompareStep(
-                    title = getString(R.string.step_title_format, 3),
+                    title = getString(R.string.guide_step3_title),
+                    body = getString(R.string.guide_step3_body),
                     safeAsset = "3.jpg",
                     riskAsset = "4.jpg"
                 )
                 binding.btnPrimaryAction.text = getString(R.string.btn_next_step_how_to_fix)
             }
             3 -> {
-                showSingleImageStep(title = getString(R.string.how_to_fix_title), asset = "5.jpg")
+                showSingleImageStep(
+                    title = getString(R.string.guide_step4_title),
+                    body = getString(R.string.guide_step4_body),
+                    asset = "5.jpg"
+                )
                 binding.btnPrimaryAction.text = getString(R.string.btn_next)
             }
             4 -> {
                 showSingleImageStep(
-                    title = getString(R.string.how_to_fix_title),
+                    title = getString(R.string.guide_step5_title),
+                    body = getString(R.string.guide_step5_body),
                     asset = "6.jpg",
                     showCompleted = true
                 )
@@ -94,18 +110,36 @@ class UnlockedContentActivity : AppCompatActivity() {
         }
     }
 
-    private fun showSingleImageStep(title: String, asset: String, showCompleted: Boolean = false) {
+    private fun updateProgressDots() {
+        val dots = listOf(
+            binding.dot0,
+            binding.dot1,
+            binding.dot2,
+            binding.dot3,
+            binding.dot4
+        )
+        dots.forEachIndexed { index, dot ->
+            dot.setBackgroundResource(
+                if (index <= currentStep) R.drawable.bg_progress_dot_active
+                else R.drawable.bg_progress_dot_inactive
+            )
+        }
+    }
+
+    private fun showSingleImageStep(title: String, body: String, asset: String, showCompleted: Boolean = false) {
         binding.tvStepTitle.text = title
-        binding.ivStepImage.visibility = View.VISIBLE
+        binding.tvStepBody.text = body
+        binding.singleMockupFrame.visibility = View.VISIBLE
         binding.compareContainer.visibility = View.GONE
         binding.tvCompletedLabel.visibility = if (showCompleted) View.VISIBLE else View.GONE
 
         loadAssetInto(binding.ivStepImage, asset)
     }
 
-    private fun showCompareStep(title: String, safeAsset: String, riskAsset: String) {
+    private fun showCompareStep(title: String, body: String, safeAsset: String, riskAsset: String) {
         binding.tvStepTitle.text = title
-        binding.ivStepImage.visibility = View.GONE
+        binding.tvStepBody.text = body
+        binding.singleMockupFrame.visibility = View.GONE
         binding.compareContainer.visibility = View.VISIBLE
         binding.tvCompletedLabel.visibility = View.GONE
 
