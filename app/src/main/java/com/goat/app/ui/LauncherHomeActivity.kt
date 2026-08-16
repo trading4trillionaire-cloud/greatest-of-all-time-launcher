@@ -163,6 +163,9 @@ class LauncherHomeActivity : AppCompatActivity() {
 
         refreshWhatsappGuideStatus()
         registerChargingReceiver()
+        if (isChargingUiVisible) {
+            binding.chargingRing.startGlowAnimation()
+        }
 
         val now = System.currentTimeMillis()
         if (cachedAd != null && (now - loadTime) > CACHE_EXPIRY_MS) {
@@ -181,6 +184,7 @@ class LauncherHomeActivity : AppCompatActivity() {
         super.onPause()
 
         unregisterChargingReceiver()
+        binding.chargingRing.pauseGlowAnimation()
 
         if (currentProgress > 0f && currentProgress < 1f) {
             snapAnimator?.cancel()
@@ -245,6 +249,7 @@ class LauncherHomeActivity : AppCompatActivity() {
 
             if (percent >= 0) {
                 binding.tvChargingPercent.text = getString(R.string.charging_percent_format, percent)
+                binding.chargingRing.setPercent(percent)
             }
             showChargingUi()
         } else {
@@ -257,11 +262,13 @@ class LauncherHomeActivity : AppCompatActivity() {
         isChargingUiVisible = true
         binding.whatsappCheckBlock.visibility = View.GONE
         binding.chargingBlock.visibility = View.VISIBLE
+        binding.chargingRing.startGlowAnimation()
     }
 
     private fun hideChargingUi() {
         if (!isChargingUiVisible) return
         isChargingUiVisible = false
+        binding.chargingRing.stopGlowAnimation()
         binding.chargingBlock.visibility = View.GONE
         binding.whatsappCheckBlock.visibility = View.VISIBLE
     }
