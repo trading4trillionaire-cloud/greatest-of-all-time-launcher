@@ -513,7 +513,9 @@ class LauncherHomeActivity : AppCompatActivity() {
         val swipeThroughViews = listOf(
             binding.whatsappGuideCard,
             binding.btnCheckWhatsappNow,
-            binding.btnCheckPhoneHistory
+            binding.btnCheckPhoneHistory,
+            binding.btnFeaturesLeft,
+            binding.btnFeaturesRight
         )
         swipeThroughViews.forEach { view ->
             view.setOnTouchListener { v, event -> handleSwipeThroughTouch(v, event) }
