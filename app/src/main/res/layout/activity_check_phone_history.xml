@@ -15,6 +15,24 @@
         android:paddingEnd="32dp"
         android:visibility="gone">
 
+        <TextView
+            android:id="@+id/tvPermissionTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="56dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/we_need_your_permission_title"
+            android:textColor="@color/home_button_text"
+            android:textStyle="bold"
+            android:textSize="22sp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="22sp"
+            android:maxLines="1"
+            android:gravity="center"
+            android:fontFamily="sans-serif"
+            android:letterSpacing="0.01" />
+
         <ImageView
             android:id="@+id/ivUsageAccessScreenshot"
             android:layout_width="match_parent"
@@ -74,5 +92,21 @@
             android:letterSpacing="0.02" />
 
     </LinearLayout>
+
+    <!-- Back button — shared across both the permission and content screens -->
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="top|start"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="14dp"
+        android:padding="9dp"
+        android:background="@drawable/bg_fix_issue_button"
+        android:src="@drawable/ic_back_arrow"
+        android:contentDescription="@null"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="12dp" />
 
 </FrameLayout>
