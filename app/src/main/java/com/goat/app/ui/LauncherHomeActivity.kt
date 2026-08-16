@@ -126,6 +126,8 @@ class LauncherHomeActivity : AppCompatActivity() {
         setupSwipeUpHint()
         setupFixIssueButton()
         setupCheckWhatsappButton()
+        setupCheckPhoneHistoryButton()
+        setupSwipeThroughForClickableCards()
         refreshWhatsappGuideStatus()
 
         val cached = cachedApps
@@ -487,6 +489,77 @@ class LauncherHomeActivity : AppCompatActivity() {
         binding.btnFixIssue.setOnClickListener {
             performFreshRestart()
         }
+    }
+
+    private fun setupCheckPhoneHistoryButton() {
+        // Non-functional for now — behaviour to be added later.
+        binding.btnCheckPhoneHistory.setOnClickListener { }
+    }
+
+    /**
+     * The WhatsApp guide card, its "Check Now" button and the "Check Phone History"
+     * button are all clickable, so by default they swallow the ACTION_DOWN of a
+     * touch gesture before it ever reaches [handleOpenDrag] on homeLayer. That made
+     * an upward swipe that starts on top of these views fail to open the app drawer.
+     *
+     * This listener re-uses the exact same drag fields/logic as [handleOpenDrag]:
+     * a normal tap is left alone (so clicks keep working), but as soon as the
+     * gesture is recognised as a vertical swipe past the touch slop, it takes over
+     * the gesture, cancels the view's own pressed/click state, and drives the
+     * drawer open exactly like swiping on empty space would.
+     */
+    private fun setupSwipeThroughForClickableCards() {
+        val swipeThroughViews = listOf(
+            binding.whatsappGuideCard,
+            binding.btnCheckWhatsappNow,
+            binding.btnCheckPhoneHistory
+        )
+        swipeThroughViews.forEach { view ->
+            view.setOnTouchListener { v, event -> handleSwipeThroughTouch(v, event) }
+        }
+    }
+
+    private fun handleSwipeThroughTouch(view: View, event: MotionEvent): Boolean {
+        if (isDrawerOpen) return false
+
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                dragStartRawY = event.rawY
+                isDraggingOpen = false
+                // Don't consume: let the view handle its own pressed state normally.
+                return false
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val deltaY = dragStartRawY - event.rawY
+                if (!isDraggingOpen && deltaY > DRAG_TOUCH_SLOP_PX) {
+                    isDraggingOpen = true
+                    snapAnimator?.cancel()
+                    binding.drawerLayer.visibility = View.VISIBLE
+
+                    // Cancel the view's own touch handling so it doesn't fire a click.
+                    view.isPressed = false
+                    val cancelEvent = MotionEvent.obtain(event)
+                    cancelEvent.action = MotionEvent.ACTION_CANCEL
+                    view.onTouchEvent(cancelEvent)
+                    cancelEvent.recycle()
+                }
+                if (isDraggingOpen) {
+                    val progress = if (drawerHeightPx > 0f) (deltaY / drawerHeightPx) else 0f
+                    applyProgress(progress.coerceIn(0f, 1f))
+                    return true
+                }
+                return false
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                if (isDraggingOpen) {
+                    isDraggingOpen = false
+                    snapToNearest()
+                    return true
+                }
+                return false
+            }
+        }
+        return false
     }
 
     private fun setupCheckWhatsappButton() {
