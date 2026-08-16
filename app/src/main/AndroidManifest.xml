@@ -61,6 +61,11 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name=".ui.CallSafetyContentActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name=".ui.CheckPhoneHistoryActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
