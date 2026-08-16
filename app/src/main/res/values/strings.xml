@@ -6,44 +6,44 @@
     <string name="no_sponsorship_available">No sponsorship available</string>
     <string name="fix_issues_button_text">Fix Issues</string>
 
-    <string name="whatsapp_guide_title">WhatsApp safety guide</string>
+    <string name="whatsapp_guide_title">WhatsApp Safety Guide</string>
     <string name="whatsapp_guide_status_not_viewed">Not viewed yet</string>
     <string name="whatsapp_guide_status_viewed_format">Viewed %1$s ago</string>
-    <string name="whatsapp_guide_button_view">View guide</string>
-    <string name="whatsapp_guide_button_view_again">View again</string>
+    <string name="whatsapp_guide_button_view">Check Now</string>
+    <string name="whatsapp_guide_button_view_again">Check again</string>
 
     <string name="watch_ad_title_line1">Watch Ad to Unlock</string>
-    <string name="watch_ad_title_line2">Unlock for 3 Minutes</string>
-    <string name="watch_ad_subtitle">WhatsApp par apna account surakshit hai ya nahi, ek chhoti si video ke baad khud check karein</string>
-    <string name="watch_ad_info_line1_title">Kya aapka WhatsApp kisi aur device se juda hai?</string>
-    <string name="watch_ad_info_line2_title">Sirf 3 minute mein poora tarika dekhein</string>
-    <string name="continue_button_text">Continue</string>
+    <string name="watch_ad_title_line2">Watch Ad to Unlock</string>
+    <string name="watch_ad_subtitle">aapka Whatsapp surakshit hai ya nahi, abhi check karein</string>
+    <string name="watch_ad_info_line1_title">Kya aapka WhatsApp koi anjaan vyakti chala raha hai?</string>
+    <string name="watch_ad_info_line2_title">Full Guide Avialable</string>
+    <string name="continue_button_text">Watch ad to Continue</string>
     <string name="no_thanks_button_text">No Thanks</string>
 
     <string name="step_title_format">Step %1$d</string>
     <string name="how_to_fix_title">How to Fix</string>
     <string name="label_safe">✅ Safe account</string>
     <string name="label_risk">⚠️ Hacked account</string>
-    <string name="btn_next_step">Next Step</string>
-    <string name="btn_next_step_how_to_fix">Next Step : How to Fix</string>
+    <string name="btn_next_step">Next</string>
+    <string name="btn_next_step_how_to_fix">Next : How to Fix</string>
     <string name="btn_next">Next</string>
     <string name="btn_show_again">Show Again</string>
     <string name="completed_label">Completed ✅</string>
 
     <string name="guide_step_of_format">STEP %1$d OF %2$d</string>
 
-    <string name="guide_step1_title">मेनू खोलें</string>
-    <string name="guide_step1_body">व्हाट्सएप खोलें और ऊपर दाईं तरफ दिए गए तीन डॉट्स पर टैप करें</string>
+    <string name="guide_step1_title">Menu खोलें</string>
+    <string name="guide_step1_body">Whatsapp खोलें और ऊपर दाईं तरफ दिए गए तीन डॉट्स पर टैप करें</string>
 
-    <string name="guide_step2_title">लिंक्ड डिवाइसेस ढूंढें</string>
-    <string name="guide_step2_body">जो मेनू खुलेगा, उसमें "Linked devices" पर टैप करें</string>
+    <string name="guide_step2_title">Linked Devices ढूंढें</string>
+    <string name="guide_step2_body">जो Menu खुलेगा, उसमें "Linked devices" पर टैप करें</string>
 
     <string name="guide_step3_title">तुलना करके देखें</string>
-    <string name="guide_step3_body">देखें एक सुरक्षित अकाउंट कैसा दिखता है, और जिसमें कोई अनजान डिवाइस जुड़ा हो वो कैसा दिखता है</string>
+    <string name="guide_step3_body">देखें एक सुरक्षित Whatsapp कैसा दिखता है, और जिसमें कोई अनजान डिवाइस जुड़ा हो वो कैसा दिखता है</string>
 
     <string name="guide_step4_title">कुछ गड़बड़ दिखी?</string>
     <string name="guide_step4_body">लिस्ट में जो भी डिवाइस आपको पहचान में न आए, उस पर टैप करें</string>
 
-    <string name="guide_step5_title">उसे लॉग आउट कर दें</string>
+    <string name="guide_step5_title">उसे Log Out कर दें</string>
     <string name="guide_step5_body">उस डिवाइस को तुरंत हटाने के लिए "Log Out" बटन दबाएं</string>
 </resources>
