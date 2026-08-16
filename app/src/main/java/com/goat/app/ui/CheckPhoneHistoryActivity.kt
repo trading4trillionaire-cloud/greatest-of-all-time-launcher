@@ -356,11 +356,15 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
     }
 
     /**
-     * Reads raw foreground-app events for the given time range, collapses
-     * consecutive repeats of the same app into a single entry, and resolves
+     * Reads raw foreground-app events for the given time range, resolves
      * each package into a display label + icon (no package names are ever
-     * shown). Returned in chronological (oldest first) order with the
-     * original timestamp preserved so callers can filter/sort per date.
+     * shown), drops any that can't be resolved, and then collapses
+     * consecutive repeats of the same app into a single entry (keeping the
+     * earliest time of that run). Collapsing happens AFTER resolving so a
+     * hidden/unresolvable system package sitting between two opens of the
+     * same app doesn't prevent them from merging. Returned in chronological
+     * (oldest first) order with the timestamp preserved so callers can
+     * filter/sort per date.
      */
     private fun queryCollapsedHistory(startMillis: Long, endMillis: Long): List<RawHistoryEntry> {
         val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
@@ -386,34 +390,49 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
             return emptyList()
         }
 
-        // Collapse consecutive repeats of the same package.
-        val collapsed = mutableListOf<Pair<String, Long>>()
-        for (item in rawEvents) {
-            val last = collapsed.lastOrNull()
-            if (last == null || last.first != item.first) {
-                collapsed.add(item)
-            }
-        }
-
         val pm = packageManager
         val timeFormatter = SimpleDateFormat("h:mm a", Locale.getDefault())
 
-        return collapsed.mapNotNull { (pkg, timestamp) ->
+        // Resolve every event first; drop packages whose label/icon can't be
+        // resolved (e.g. hidden system components) so they don't sit between
+        // two entries of the same app and block them from merging below.
+        data class Resolved(val pkg: String, val label: String, val icon: Drawable, val timestamp: Long)
+
+        val resolved = rawEvents.mapNotNull { (pkg, timestamp) ->
             try {
                 val appInfo = pm.getApplicationInfo(pkg, 0)
-                val label = pm.getApplicationLabel(appInfo).toString()
-                val icon: Drawable = pm.getApplicationIcon(appInfo)
-                RawHistoryEntry(
-                    label = label,
-                    icon = icon,
-                    timestamp = timestamp,
-                    timeText = timeFormatter.format(timestamp)
+                Resolved(
+                    pkg = pkg,
+                    label = pm.getApplicationLabel(appInfo).toString(),
+                    icon = pm.getApplicationIcon(appInfo),
+                    timestamp = timestamp
                 )
             } catch (e: PackageManager.NameNotFoundException) {
                 null
             } catch (e: Exception) {
                 null
             }
+        }
+
+        // Now collapse consecutive repeats of the same app on the already
+        // resolved+filtered list, keeping the earliest timestamp of each run.
+        val collapsed = mutableListOf<Resolved>()
+        for (item in resolved) {
+            val last = collapsed.lastOrNull()
+            if (last == null || last.pkg != item.pkg) {
+                collapsed.add(item)
+            }
+            // else: same app repeated right after the previous entry — skip it,
+            // the earlier (already added) occurrence's timestamp is kept.
+        }
+
+        return collapsed.map { entry ->
+            RawHistoryEntry(
+                label = entry.label,
+                icon = entry.icon,
+                timestamp = entry.timestamp,
+                timeText = timeFormatter.format(entry.timestamp)
+            )
         }
     }
 }
