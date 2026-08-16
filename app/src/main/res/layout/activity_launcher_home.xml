@@ -13,36 +13,102 @@
         android:gravity="top|center_horizontal"
         android:paddingTop="48dp">
 
-        <TextClock
-            android:id="@+id/clock"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/topRow"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:format12Hour="hh\nmm"
-            android:format24Hour="@null"
-            android:textColor="@color/home_button_text"
-            android:textSize="72sp"
-            android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="40sp"
-            android:autoSizeMaxTextSize="72sp"
-            android:maxLines="2"
-            android:lineSpacingMultiplier="0.9"
-            android:gravity="center"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold|italic"
-            android:letterSpacing="0.01" />
+            android:orientation="horizontal"
+            android:gravity="top"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp">
 
-        <TextClock
-            android:id="@+id/dateClock"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:format12Hour="EEE d MMMM"
-            android:format24Hour="EEE d MMMM"
-            android:textColor="@color/home_button_text"
-            android:textSize="15sp"
-            android:textAllCaps="true"
-            android:fontFamily="sans-serif"
-            android:letterSpacing="0.05" />
+            <LinearLayout
+                android:id="@+id/clockBlock"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="start">
+
+                <TextClock
+                    android:id="@+id/clock"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:format12Hour="hh\nmm"
+                    android:format24Hour="@null"
+                    android:textColor="@color/home_button_text"
+                    android:textSize="56sp"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="32sp"
+                    android:autoSizeMaxTextSize="56sp"
+                    android:maxLines="2"
+                    android:lineSpacingMultiplier="0.9"
+                    android:gravity="start"
+                    android:textAlignment="viewStart"
+                    android:fontFamily="sans-serif"
+                    android:textStyle="bold|italic"
+                    android:letterSpacing="0.01" />
+
+                <TextClock
+                    android:id="@+id/dateClock"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:format12Hour="EEE d MMMM"
+                    android:format24Hour="EEE d MMMM"
+                    android:textColor="@color/home_button_text"
+                    android:textSize="15sp"
+                    android:textAllCaps="true"
+                    android:gravity="start"
+                    android:textAlignment="viewStart"
+                    android:fontFamily="sans-serif"
+                    android:letterSpacing="0.05" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/storageCleanCard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="6dp"
+                android:orientation="vertical"
+                android:background="@drawable/bg_whatsapp_guide_card"
+                android:minWidth="126dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:id="@+id/tvCleanStorageTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/clean_storage_title"
+                    android:textColor="@color/guide_card_title_text"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:fontFamily="sans-serif" />
+
+                <TextView
+                    android:id="@+id/tvCleanStorageSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="@string/clean_storage_size_calculating"
+                    android:textColor="@color/guide_card_subtitle_text"
+                    android:textSize="12sp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:fontFamily="sans-serif" />
+
+            </LinearLayout>
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/whatsappCheckBlock"
