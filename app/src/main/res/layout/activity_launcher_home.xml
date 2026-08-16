@@ -354,6 +354,54 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/chargingBlock"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="40dp"
+            android:visibility="gone"
+            android:clickable="false"
+            android:focusable="false">
+
+            <ImageView
+                android:id="@+id/ivChargingBolt"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_charging_bolt"
+                android:contentDescription="@string/charging_label" />
+
+            <TextView
+                android:id="@+id/tvChargingPercent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/charging_percent_placeholder"
+                android:textColor="@color/home_button_text"
+                android:textSize="64sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif"
+                android:includeFontPadding="false" />
+
+            <TextView
+                android:id="@+id/tvChargingLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/charging_label"
+                android:textColor="@color/home_button_text"
+                android:textSize="12sp"
+                android:textAllCaps="true"
+                android:alpha="0.7"
+                android:letterSpacing="0.08"
+                android:fontFamily="sans-serif" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <FrameLayout
