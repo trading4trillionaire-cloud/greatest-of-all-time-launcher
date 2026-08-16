@@ -92,11 +92,58 @@
             android:fontFamily="sans-serif"
             android:letterSpacing="0.02" />
 
+        <!-- Fixed (non vertically-scrollable) section: date chips only scroll horizontally -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:scrollbars="none"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:clipToPadding="false"
+            android:overScrollMode="never">
+
+            <LinearLayout
+                android:id="@+id/dateChipContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical" />
+
+        </HorizontalScrollView>
+
+        <TextView
+            android:id="@+id/tvSelectedDateHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="4dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:gravity="center"
+            android:textColor="@color/history_date_header_text"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif"
+            tools:text="Sunday, 16 August" />
+
+        <TextView
+            android:id="@+id/tvHistorySummary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:textColor="@color/history_summary_text"
+            android:textSize="12sp"
+            android:alpha="0.85"
+            android:fontFamily="sans-serif"
+            tools:text="6 apps opened" />
+
+        <!-- Only the app history list itself scrolls vertically -->
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_marginTop="18dp"
             android:clipToPadding="false"
             android:paddingBottom="24dp">
 
@@ -104,50 +151,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
-                <HorizontalScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:scrollbars="none"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:clipToPadding="false">
-
-                    <LinearLayout
-                        android:id="@+id/dateChipContainer"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical" />
-
-                </HorizontalScrollView>
-
-                <TextView
-                    android:id="@+id/tvSelectedDateHeader"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="4dp"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp"
-                    android:gravity="center"
-                    android:textColor="@color/history_date_header_text"
-                    android:textSize="17sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif"
-                    tools:text="Sunday, 16 August" />
-
-                <TextView
-                    android:id="@+id/tvHistorySummary"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:gravity="center"
-                    android:textColor="@color/history_summary_text"
-                    android:textSize="12sp"
-                    android:alpha="0.85"
-                    android:fontFamily="sans-serif"
-                    tools:text="6 apps opened" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvAppHistory"
