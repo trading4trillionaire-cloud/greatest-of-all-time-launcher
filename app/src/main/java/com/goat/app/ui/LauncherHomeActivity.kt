@@ -499,18 +499,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * The WhatsApp guide card, its "Check Now" button and the "Check Phone History"
-     * button are all clickable, so by default they swallow the ACTION_DOWN of a
-     * touch gesture before it ever reaches [handleOpenDrag] on homeLayer. That made
-     * an upward swipe that starts on top of these views fail to open the app drawer.
-     *
-     * This listener re-uses the exact same drag fields/logic as [handleOpenDrag]:
-     * a normal tap is left alone (so clicks keep working), but as soon as the
-     * gesture is recognised as a vertical swipe past the touch slop, it takes over
-     * the gesture, cancels the view's own pressed/click state, and drives the
-     * drawer open exactly like swiping on empty space would.
-     */
     private fun setupSwipeThroughForClickableCards() {
         val swipeThroughViews = listOf(
             binding.whatsappGuideCard,
@@ -533,7 +521,7 @@ class LauncherHomeActivity : AppCompatActivity() {
             MotionEvent.ACTION_DOWN -> {
                 dragStartRawY = event.rawY
                 isDraggingOpen = false
-                // Don't consume: let the view handle its own pressed state normally.
+
                 return false
             }
             MotionEvent.ACTION_MOVE -> {
@@ -543,7 +531,6 @@ class LauncherHomeActivity : AppCompatActivity() {
                     snapAnimator?.cancel()
                     binding.drawerLayer.visibility = View.VISIBLE
 
-                    // Cancel the view's own touch handling so it doesn't fire a click.
                     view.isPressed = false
                     val cancelEvent = MotionEvent.obtain(event)
                     cancelEvent.action = MotionEvent.ACTION_CANCEL
@@ -571,7 +558,7 @@ class LauncherHomeActivity : AppCompatActivity() {
 
     private fun setupCheckWhatsappButton() {
         val openGuide = View.OnClickListener {
-            // No restriction, no ad — content is free to access directly.
+
             startActivity(Intent(this, UnlockedContentActivity::class.java))
         }
 
@@ -588,12 +575,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         binding.callGuideCard.setOnClickListener(openCallGuide)
     }
 
-    /**
-     * The home screen currently shows two feature cards (WhatsApp safety, Calls
-     * safety). The left/right arrow buttons below the card cycle between them.
-     * More cards can be appended to [featureCards] later without touching the
-     * navigation logic.
-     */
     private var currentFeatureCardIndex = 0
 
     private fun setupFeaturesNav() {
