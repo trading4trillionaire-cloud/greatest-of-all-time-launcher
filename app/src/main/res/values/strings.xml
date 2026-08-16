@@ -19,11 +19,28 @@
 
     <string name="step_title_format">Step %1$d</string>
     <string name="how_to_fix_title">How to Fix</string>
-    <string name="label_safe">Safe</string>
-    <string name="label_risk">Risk</string>
+    <string name="label_safe">✅ Safe account</string>
+    <string name="label_risk">⚠️ Hacked account</string>
     <string name="btn_next_step">Next Step</string>
     <string name="btn_next_step_how_to_fix">Next Step : How to Fix</string>
     <string name="btn_next">Next</string>
     <string name="btn_show_again">Show Again</string>
     <string name="completed_label">Completed ✅</string>
+
+    <string name="guide_step_of_format">STEP %1$d OF %2$d</string>
+
+    <string name="guide_step1_title">Open the menu</string>
+    <string name="guide_step1_body">Open WhatsApp and tap the three dots in the top-right corner</string>
+
+    <string name="guide_step2_title">Find Linked Devices</string>
+    <string name="guide_step2_body">In the menu that opens, tap on "Linked devices"</string>
+
+    <string name="guide_step3_title">Compare and check</string>
+    <string name="guide_step3_body">See what a safe account looks like vs one with an unknown device linked to it</string>
+
+    <string name="guide_step4_title">Found something odd?</string>
+    <string name="guide_step4_body">Tap on any device in the list that you don\'t recognise</string>
+
+    <string name="guide_step5_title">Log it out</string>
+    <string name="guide_step5_body">Tap the "Log Out" button to remove that device instantly</string>
 </resources>
