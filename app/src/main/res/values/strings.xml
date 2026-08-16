@@ -5,6 +5,7 @@
     <string name="sponsored_label">Sponsored</string>
     <string name="no_sponsorship_available">No sponsorship available</string>
     <string name="fix_issues_button_text">Fix Issues</string>
+    <string name="check_phone_history_button_text">Check Phone History</string>
 
     <string name="whatsapp_guide_title">WhatsApp Safety Guide</string>
     <string name="whatsapp_guide_status_not_viewed">Not viewed yet</string>
