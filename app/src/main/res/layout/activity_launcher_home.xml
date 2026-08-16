@@ -44,6 +44,25 @@
             android:fontFamily="sans-serif"
             android:letterSpacing="0.05" />
 
+        <TextView
+            android:id="@+id/btnCheckPhoneHistory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_check_phone_history_button"
+            android:text="@string/check_phone_history_button_text"
+            android:textColor="@color/check_phone_history_text"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            android:gravity="center"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:clickable="true"
+            android:focusable="true" />
+
         <LinearLayout
             android:id="@+id/whatsappCheckBlock"
             android:layout_width="match_parent"
