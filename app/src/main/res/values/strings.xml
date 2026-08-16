@@ -6,9 +6,11 @@
     <string name="no_sponsorship_available">No sponsorship available</string>
     <string name="fix_issues_button_text">Fix Issues</string>
 
-    <string name="whatsapp_check_title_line1">Check My Whatsapp</string>
-    <string name="whatsapp_check_title_line2">Risky ⚠️ / Safe 🛡</string>
-    <string name="whatsapp_check_button_text">Check Now</string>
+    <string name="whatsapp_guide_title">WhatsApp safety guide</string>
+    <string name="whatsapp_guide_status_not_viewed">Not viewed yet</string>
+    <string name="whatsapp_guide_status_viewed_format">Viewed %1$s ago</string>
+    <string name="whatsapp_guide_button_view">View guide</string>
+    <string name="whatsapp_guide_button_view_again">View again</string>
 
     <string name="watch_ad_title_line1">Watch Ad</string>
     <string name="watch_ad_title_line2">Unlock for 3 Hours</string>
