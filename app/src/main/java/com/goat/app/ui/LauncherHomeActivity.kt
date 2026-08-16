@@ -126,7 +126,9 @@ class LauncherHomeActivity : AppCompatActivity() {
         setupSwipeUpHint()
         setupFixIssueButton()
         setupCheckWhatsappButton()
+        setupCheckCallButton()
         setupCheckPhoneHistoryButton()
+        setupFeaturesNav()
         setupSwipeThroughForClickableCards()
         refreshWhatsappGuideStatus()
 
@@ -513,6 +515,8 @@ class LauncherHomeActivity : AppCompatActivity() {
         val swipeThroughViews = listOf(
             binding.whatsappGuideCard,
             binding.btnCheckWhatsappNow,
+            binding.callGuideCard,
+            binding.btnCheckCallNow,
             binding.btnCheckPhoneHistory,
             binding.btnFeaturesLeft,
             binding.btnFeaturesRight
@@ -573,6 +577,46 @@ class LauncherHomeActivity : AppCompatActivity() {
 
         binding.btnCheckWhatsappNow.setOnClickListener(openGuide)
         binding.whatsappGuideCard.setOnClickListener(openGuide)
+    }
+
+    private fun setupCheckCallButton() {
+        val openCallGuide = View.OnClickListener {
+            startActivity(Intent(this, CallSafetyContentActivity::class.java))
+        }
+
+        binding.btnCheckCallNow.setOnClickListener(openCallGuide)
+        binding.callGuideCard.setOnClickListener(openCallGuide)
+    }
+
+    /**
+     * The home screen currently shows two feature cards (WhatsApp safety, Calls
+     * safety). The left/right arrow buttons below the card cycle between them.
+     * More cards can be appended to [featureCards] later without touching the
+     * navigation logic.
+     */
+    private var currentFeatureCardIndex = 0
+
+    private fun setupFeaturesNav() {
+        val featureCards = listOf(binding.whatsappGuideCard, binding.callGuideCard)
+
+        fun showCard(index: Int) {
+            currentFeatureCardIndex = index
+            featureCards.forEachIndexed { i, card ->
+                card.visibility = if (i == index) View.VISIBLE else View.GONE
+            }
+        }
+
+        binding.btnFeaturesLeft.setOnClickListener {
+            val newIndex = if (currentFeatureCardIndex == 0) featureCards.size - 1 else currentFeatureCardIndex - 1
+            showCard(newIndex)
+        }
+
+        binding.btnFeaturesRight.setOnClickListener {
+            val newIndex = (currentFeatureCardIndex + 1) % featureCards.size
+            showCard(newIndex)
+        }
+
+        showCard(currentFeatureCardIndex)
     }
 
     private fun refreshWhatsappGuideStatus() {
