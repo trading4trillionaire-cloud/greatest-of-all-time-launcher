@@ -552,10 +552,23 @@ class LauncherHomeActivity : AppCompatActivity() {
     private fun computeTotalAppCacheLabel(): String {
         val totalBytes = try {
             val pm = packageManager
+            val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+            val resolved: List<ResolveInfo> = try {
+                pm.queryIntentActivities(intent, 0)
+            } catch (e: Exception) {
+                emptyList()
+            }
+
+            // Only the apps that actually show up in the drawer — same filter as loadAppsAsync.
+            val drawerPackageNames = resolved
+                .map { it.activityInfo.packageName }
+                .filter { it != packageName }
+                .distinct()
+
             var total = 0L
-            val apps = pm.getInstalledApplications(0)
-            for (appInfo in apps) {
+            for (pkg in drawerPackageNames) {
                 try {
+                    val appInfo = pm.getApplicationInfo(pkg, 0)
                     val apkFile = java.io.File(appInfo.sourceDir)
                     if (apkFile.exists()) {
                         total += (apkFile.length() * CACHE_ESTIMATE_FACTOR).toLong()
