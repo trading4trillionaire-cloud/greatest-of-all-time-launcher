@@ -18,17 +18,25 @@
         <ImageView
             android:id="@+id/ivUsageAccessScreenshot"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:contentDescription="@string/usage_access_screenshot_description" />
+
+        <ImageView
+            android:id="@+id/ivGrantPermissionArrow"
+            android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
-            android:contentDescription="@string/usage_access_screenshot_description" />
+            android:src="@drawable/ic_arrow_down_bold"
+            android:contentDescription="@null" />
 
         <TextView
             android:id="@+id/btnGrantPermission"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
             android:layout_marginBottom="24dp"
             android:background="@drawable/bg_check_now_button"
             android:text="@string/grant_permission_button_text"
