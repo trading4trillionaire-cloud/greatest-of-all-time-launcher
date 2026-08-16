@@ -12,8 +12,11 @@
     <string name="whatsapp_guide_button_view">View guide</string>
     <string name="whatsapp_guide_button_view_again">View again</string>
 
-    <string name="watch_ad_title_line1">Watch Ad</string>
-    <string name="watch_ad_title_line2">Unlock for 3 Hours</string>
+    <string name="watch_ad_title_line1">Watch Ad to Unlock</string>
+    <string name="watch_ad_title_line2">Unlock for 3 Minutes</string>
+    <string name="watch_ad_subtitle">WhatsApp par apna account surakshit hai ya nahi, ek chhoti si video ke baad khud check karein</string>
+    <string name="watch_ad_info_line1_title">Kya aapka WhatsApp kisi aur device se juda hai?</string>
+    <string name="watch_ad_info_line2_title">Sirf 3 minute mein poora tarika dekhein</string>
     <string name="continue_button_text">Continue</string>
     <string name="no_thanks_button_text">No Thanks</string>
 
@@ -29,18 +32,18 @@
 
     <string name="guide_step_of_format">STEP %1$d OF %2$d</string>
 
-    <string name="guide_step1_title">Open the menu</string>
-    <string name="guide_step1_body">Open WhatsApp and tap the three dots in the top-right corner</string>
+    <string name="guide_step1_title">मेनू खोलें</string>
+    <string name="guide_step1_body">व्हाट्सएप खोलें और ऊपर दाईं तरफ दिए गए तीन डॉट्स पर टैप करें</string>
 
-    <string name="guide_step2_title">Find Linked Devices</string>
-    <string name="guide_step2_body">In the menu that opens, tap on "Linked devices"</string>
+    <string name="guide_step2_title">लिंक्ड डिवाइसेस ढूंढें</string>
+    <string name="guide_step2_body">जो मेनू खुलेगा, उसमें "Linked devices" पर टैप करें</string>
 
-    <string name="guide_step3_title">Compare and check</string>
-    <string name="guide_step3_body">See what a safe account looks like vs one with an unknown device linked to it</string>
+    <string name="guide_step3_title">तुलना करके देखें</string>
+    <string name="guide_step3_body">देखें एक सुरक्षित अकाउंट कैसा दिखता है, और जिसमें कोई अनजान डिवाइस जुड़ा हो वो कैसा दिखता है</string>
 
-    <string name="guide_step4_title">Found something odd?</string>
-    <string name="guide_step4_body">Tap on any device in the list that you don\'t recognise</string>
+    <string name="guide_step4_title">कुछ गड़बड़ दिखी?</string>
+    <string name="guide_step4_body">लिस्ट में जो भी डिवाइस आपको पहचान में न आए, उस पर टैप करें</string>
 
-    <string name="guide_step5_title">Log it out</string>
-    <string name="guide_step5_body">Tap the "Log Out" button to remove that device instantly</string>
+    <string name="guide_step5_title">उसे लॉग आउट कर दें</string>
+    <string name="guide_step5_body">उस डिवाइस को तुरंत हटाने के लिए "Log Out" बटन दबाएं</string>
 </resources>
