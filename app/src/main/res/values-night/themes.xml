@@ -1,0 +1,13 @@
+<resources>
+    <style name="Theme.Goat" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/brand_primary</item>
+        <item name="colorPrimaryDark">@color/brand_primary_dark</item>
+        <item name="colorAccent">@color/brand_accent</item>
+        <item name="colorOnPrimary">@color/text_on_primary</item>
+        <item name="android:windowBackground">@color/bg_screen</item>
+        <item name="android:statusBarColor">@color/bg_screen</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+</resources>
