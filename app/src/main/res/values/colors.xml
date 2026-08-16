@@ -26,4 +26,8 @@
     <color name="label_safe_color">#25D366</color>
     <color name="label_risk_color">#FF5C5C</color>
 
+    <color name="feature_cta_text">#171B26</color>
+    <color name="feature_status_safe_bg">#25D366</color>
+    <color name="feature_status_risk_bg">#FF5C5C</color>
+
 </resources>
