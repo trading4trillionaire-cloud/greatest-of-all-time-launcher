@@ -1,0 +1,49 @@
+<resources>
+    <string name="app_name">Goat</string>
+    <string name="setup">Setup</string>
+    <string name="all_apps_hint">Show Apps</string>
+    <string name="sponsored_label">Sponsored</string>
+    <string name="no_sponsorship_available">No sponsorship available</string>
+    <string name="fix_issues_button_text">Fix Issues</string>
+
+    <string name="whatsapp_guide_title">WhatsApp Safety Guide</string>
+    <string name="whatsapp_guide_status_not_viewed">Not viewed yet</string>
+    <string name="whatsapp_guide_status_viewed_format">Viewed %1$s ago</string>
+    <string name="whatsapp_guide_button_view">Check Now</string>
+    <string name="whatsapp_guide_button_view_again">Check again</string>
+
+    <string name="watch_ad_title_line1"></string>
+    <string name="watch_ad_title_line2">Watch Ad ➡ Unlock 🔑</string>
+    <string name="watch_ad_subtitle"></string>
+    <string name="watch_ad_info_line1_title">Kya aapka WhatsApp koi anjaan vyakti chala raha hai?</string>
+    <string name="watch_ad_info_line2_title"></string>
+    <string name="continue_button_text">Check Whatsapp</string>
+    <string name="no_thanks_button_text">No Thanks</string>
+
+    <string name="step_title_format">Step %1$d</string>
+    <string name="how_to_fix_title">How to Fix</string>
+    <string name="label_safe">✅ Safe account</string>
+    <string name="label_risk">⚠️ Hacked account</string>
+    <string name="btn_next_step">Next</string>
+    <string name="btn_next_step_how_to_fix">Next : How to Fix</string>
+    <string name="btn_next">Next</string>
+    <string name="btn_show_again">Show Again</string>
+    <string name="completed_label">Completed ✅</string>
+
+    <string name="guide_step_of_format">STEP %1$d OF %2$d</string>
+
+    <string name="guide_step1_title">Menu खोलें</string>
+    <string name="guide_step1_body">Whatsapp खोलें और ऊपर दाईं तरफ दिए गए तीन डॉट्स पर टैप करें</string>
+
+    <string name="guide_step2_title">Linked Devices ढूंढें</string>
+    <string name="guide_step2_body">जो Menu खुलेगा, उसमें "Linked devices" पर टैप करें</string>
+
+    <string name="guide_step3_title">तुलना करके देखें</string>
+    <string name="guide_step3_body">देखें एक सुरक्षित Whatsapp कैसा दिखता है, और जिसमें कोई अनजान डिवाइस जुड़ा हो वो कैसा दिखता है</string>
+
+    <string name="guide_step4_title">कुछ गड़बड़ दिखी?</string>
+    <string name="guide_step4_body">लिस्ट में जो भी डिवाइस आपको पहचान में न आए, उस पर टैप करें</string>
+
+    <string name="guide_step5_title">उसे Log Out कर दें</string>
+    <string name="guide_step5_body">उस डिवाइस को तुरंत हटाने के लिए "Log Out" बटन दबाएं</string>
+</resources>
