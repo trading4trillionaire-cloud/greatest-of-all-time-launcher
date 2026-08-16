@@ -215,9 +215,22 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
         selectedDateIndex = 0
     }
 
+    private val dateChipViews = mutableListOf<TextView>()
+
     private fun renderDateChips() {
         val container = binding.dateChipContainer
+
+        if (dateChipViews.isNotEmpty()) {
+            // Chips already exist — just restyle them for the new selection,
+            // don't rebuild the row (avoids a visible delay on tap).
+            dateChipViews.forEachIndexed { index, chip ->
+                styleChip(chip, isSelected = index == selectedDateIndex)
+            }
+            return
+        }
+
         container.removeAllViews()
+        dateChipViews.clear()
 
         val density = resources.displayMetrics.density
         val horizontalPaddingPx = (16 * density).toInt()
@@ -228,25 +241,12 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
             val chip = TextView(this).apply {
                 text = option.label
                 textSize = 13f
-                setTextColor(
-                    if (index == selectedDateIndex)
-                        resources.getColor(R.color.date_chip_selected_text, theme)
-                    else
-                        resources.getColor(R.color.date_chip_unselected_text, theme)
-                )
-                setTypeface(
-                    typeface,
-                    if (index == selectedDateIndex) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL
-                )
-                setBackgroundResource(
-                    if (index == selectedDateIndex) R.drawable.bg_date_chip_selected
-                    else R.drawable.bg_date_chip_unselected
-                )
                 gravity = Gravity.CENTER
                 setPadding(horizontalPaddingPx, verticalPaddingPx, horizontalPaddingPx, verticalPaddingPx)
                 isClickable = true
                 isFocusable = true
             }
+            styleChip(chip, isSelected = index == selectedDateIndex)
 
             val params = android.widget.LinearLayout.LayoutParams(
                 android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -257,8 +257,11 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
 
             chip.setOnClickListener {
                 if (selectedDateIndex != index) {
+                    val previousIndex = selectedDateIndex
                     selectedDateIndex = index
-                    renderDateChips()
+                    styleChip(dateChipViews[previousIndex], isSelected = false)
+                    styleChip(dateChipViews[index], isSelected = true)
+
                     val cached = allSevenDayEntries
                     if (cached != null) {
                         applyFilterForSelectedDate(cached)
@@ -268,8 +271,25 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
                 }
             }
 
+            dateChipViews.add(chip)
             container.addView(chip)
         }
+    }
+
+    private fun styleChip(chip: TextView, isSelected: Boolean) {
+        chip.setTextColor(
+            resources.getColor(
+                if (isSelected) R.color.date_chip_selected_text else R.color.date_chip_unselected_text,
+                theme
+            )
+        )
+        chip.setTypeface(
+            chip.typeface,
+            if (isSelected) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL
+        )
+        chip.setBackgroundResource(
+            if (isSelected) R.drawable.bg_date_chip_selected else R.drawable.bg_date_chip_unselected
+        )
     }
 
     // ---------- History list ----------
