@@ -12,6 +12,10 @@
     <string name="whatsapp_guide_button_view">Check Now</string>
     <string name="whatsapp_guide_button_view_again">Check again</string>
 
+    <string name="clean_storage_title">Clean Storage</string>
+    <string name="clean_storage_size_calculating">Calculating…</string>
+    <string name="open_button_text">Open</string>
+
     <string name="watch_ad_title_line1"></string>
     <string name="watch_ad_title_line2">Watch Ad ➡ Unlock 🔑</string>
     <string name="watch_ad_subtitle"></string>
