@@ -1,10 +1,14 @@
 package com.goat.app.ui
 
 import android.app.AppOpsManager
+import android.app.usage.UsageEvents
+import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -12,22 +16,40 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Process
 import android.provider.Settings
+import android.view.Gravity
 import android.view.View
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.goat.app.R
 import com.goat.app.databinding.ActivityCheckPhoneHistoryBinding
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import java.util.concurrent.Executors
 
 class CheckPhoneHistoryActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCheckPhoneHistoryBinding
 
-    private val imageLoadExecutor = Executors.newSingleThreadExecutor()
+    private val bgExecutor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
+
+    private val dateOptions = mutableListOf<DateOption>()
+    private var selectedDateIndex = 0
+    private var loadRequestId = 0
+
+    private data class DateOption(
+        val label: String,
+        val startMillis: Long,
+        val endMillis: Long
+    )
 
     companion object {
         private const val USAGE_ACCESS_ASSET_FOLDER = "Usage_Access_Permission"
         private const val USAGE_ACCESS_ASSET_FILE = "1.jpg"
+        private const val DAYS_TO_SHOW = 7
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,6 +70,9 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
                 goToLauncher()
             }
         })
+
+        binding.rvAppHistory.layoutManager = LinearLayoutManager(this)
+        buildDateOptions()
     }
 
     override fun onResume() {
@@ -56,7 +81,7 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        imageLoadExecutor.shutdown()
+        bgExecutor.shutdown()
         super.onDestroy()
     }
 
@@ -71,6 +96,8 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
     private fun showContentScreen() {
         binding.permissionLayer.visibility = View.GONE
         binding.contentLayer.visibility = View.VISIBLE
+        renderDateChips()
+        loadHistoryForSelectedDate()
     }
 
     private fun showPermissionScreen() {
@@ -80,7 +107,7 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
     }
 
     private fun loadUsageAccessScreenshot() {
-        imageLoadExecutor.execute {
+        bgExecutor.execute {
             val bitmap: Bitmap? = try {
                 assets.open("$USAGE_ACCESS_ASSET_FOLDER/$USAGE_ACCESS_ASSET_FILE").use { input ->
                     BitmapFactory.decodeStream(input)
@@ -123,7 +150,6 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
             }
             startActivity(intent)
         } catch (e: Exception) {
-            // Fallback for devices where the direct-to-app deep link isn't supported.
             try {
                 startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
             } catch (e2: Exception) {
@@ -136,5 +162,184 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         startActivity(intent)
         finish()
+    }
+
+    // ---------- Date chips ----------
+
+    private fun buildDateOptions() {
+        dateOptions.clear()
+        val calendar = Calendar.getInstance()
+
+        for (i in 0 until DAYS_TO_SHOW) {
+            calendar.timeInMillis = System.currentTimeMillis()
+            calendar.add(Calendar.DAY_OF_YEAR, -i)
+
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+            val startMillis = calendar.timeInMillis
+
+            val endMillis = when (i) {
+                0 -> System.currentTimeMillis()
+                else -> startMillis + (24L * 60 * 60 * 1000) - 1
+            }
+
+            val label = when (i) {
+                0 -> getString(R.string.history_date_today)
+                1 -> getString(R.string.history_date_yesterday)
+                else -> SimpleDateFormat("EEE d MMM", Locale.getDefault()).format(startMillis)
+            }
+
+            dateOptions.add(DateOption(label, startMillis, endMillis))
+        }
+
+        selectedDateIndex = 0
+    }
+
+    private fun renderDateChips() {
+        val container = binding.dateChipContainer
+        container.removeAllViews()
+
+        val density = resources.displayMetrics.density
+        val horizontalPaddingPx = (16 * density).toInt()
+        val verticalPaddingPx = (9 * density).toInt()
+        val marginEndPx = (8 * density).toInt()
+
+        dateOptions.forEachIndexed { index, option ->
+            val chip = TextView(this).apply {
+                text = option.label
+                textSize = 13f
+                setTextColor(
+                    if (index == selectedDateIndex)
+                        resources.getColor(R.color.date_chip_selected_text, theme)
+                    else
+                        resources.getColor(R.color.date_chip_unselected_text, theme)
+                )
+                setTypeface(
+                    typeface,
+                    if (index == selectedDateIndex) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL
+                )
+                setBackgroundResource(
+                    if (index == selectedDateIndex) R.drawable.bg_date_chip_selected
+                    else R.drawable.bg_date_chip_unselected
+                )
+                gravity = Gravity.CENTER
+                setPadding(horizontalPaddingPx, verticalPaddingPx, horizontalPaddingPx, verticalPaddingPx)
+                isClickable = true
+                isFocusable = true
+            }
+
+            val params = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            params.marginEnd = marginEndPx
+            chip.layoutParams = params
+
+            chip.setOnClickListener {
+                if (selectedDateIndex != index) {
+                    selectedDateIndex = index
+                    renderDateChips()
+                    loadHistoryForSelectedDate()
+                }
+            }
+
+            container.addView(chip)
+        }
+    }
+
+    // ---------- History list ----------
+
+    private fun loadHistoryForSelectedDate() {
+        val option = dateOptions.getOrNull(selectedDateIndex) ?: return
+        val requestId = ++loadRequestId
+
+        binding.tvSelectedDateHeader.text =
+            SimpleDateFormat("EEEE, d MMMM", Locale.getDefault()).format(option.startMillis)
+        binding.tvHistorySummary.text = ""
+        binding.rvAppHistory.adapter = AppHistoryAdapter(emptyList())
+        binding.tvHistoryEmpty.visibility = View.GONE
+
+        bgExecutor.execute {
+            val entries = queryCollapsedHistory(option.startMillis, option.endMillis)
+
+            mainHandler.post {
+                if (isFinishing || isDestroyed || requestId != loadRequestId) return@post
+
+                binding.rvAppHistory.adapter = AppHistoryAdapter(entries)
+                binding.tvHistoryEmpty.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
+                binding.tvHistorySummary.text = if (entries.isEmpty()) {
+                    ""
+                } else if (entries.size == 1) {
+                    getString(R.string.history_summary_format_singular, entries.size)
+                } else {
+                    getString(R.string.history_summary_format_plural, entries.size)
+                }
+            }
+        }
+    }
+
+    /**
+     * Reads raw foreground-app events for the given time range, collapses
+     * consecutive repeats of the same app into a single entry, resolves each
+     * package into a display label + icon (no package names are ever shown),
+     * and returns the list with the most recent app open first.
+     */
+    private fun queryCollapsedHistory(startMillis: Long, endMillis: Long): List<AppHistoryEntry> {
+        val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
+            ?: return emptyList()
+
+        val rawEvents = mutableListOf<Pair<String, Long>>()
+        try {
+            val events = usageStatsManager.queryEvents(startMillis, endMillis)
+            val event = UsageEvents.Event()
+            while (events.hasNextEvent()) {
+                events.getNextEvent(event)
+                val isForegroundEvent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    event.eventType == UsageEvents.Event.ACTIVITY_RESUMED
+                } else {
+                    @Suppress("DEPRECATION")
+                    event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND
+                }
+                if (isForegroundEvent && event.packageName != packageName) {
+                    rawEvents.add(event.packageName to event.timeStamp)
+                }
+            }
+        } catch (e: Exception) {
+            return emptyList()
+        }
+
+        // Collapse consecutive repeats of the same package.
+        val collapsed = mutableListOf<Pair<String, Long>>()
+        for (item in rawEvents) {
+            val last = collapsed.lastOrNull()
+            if (last == null || last.first != item.first) {
+                collapsed.add(item)
+            }
+        }
+
+        val pm = packageManager
+        val timeFormatter = SimpleDateFormat("h:mm a", Locale.getDefault())
+
+        val entries = collapsed.mapNotNull { (pkg, timestamp) ->
+            try {
+                val appInfo = pm.getApplicationInfo(pkg, 0)
+                val label = pm.getApplicationLabel(appInfo).toString()
+                val icon: Drawable = pm.getApplicationIcon(appInfo)
+                AppHistoryEntry(
+                    label = label,
+                    icon = icon,
+                    timeText = timeFormatter.format(timestamp)
+                )
+            } catch (e: PackageManager.NameNotFoundException) {
+                null
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        // Most recent app open at the top.
+        return entries.reversed()
     }
 }
