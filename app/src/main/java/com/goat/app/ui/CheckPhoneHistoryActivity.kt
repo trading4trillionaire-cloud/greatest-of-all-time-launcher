@@ -13,6 +13,7 @@ import android.os.Looper
 import android.os.Process
 import android.provider.Settings
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.goat.app.databinding.ActivityCheckPhoneHistoryBinding
 import java.util.concurrent.Executors
@@ -37,6 +38,16 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
         binding.btnGrantPermission.setOnClickListener {
             openUsageAccessSettings()
         }
+
+        binding.btnBack.setOnClickListener {
+            goToLauncher()
+        }
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                goToLauncher()
+            }
+        })
     }
 
     override fun onResume() {
@@ -118,5 +129,12 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
             } catch (e2: Exception) {
             }
         }
+    }
+
+    private fun goToLauncher() {
+        val intent = Intent(this, LauncherHomeActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        startActivity(intent)
+        finish()
     }
 }
