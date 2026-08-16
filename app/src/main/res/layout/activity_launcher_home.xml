@@ -11,6 +11,8 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="top|center_horizontal"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:paddingTop="48dp">
 
         <TextClock
@@ -44,12 +46,12 @@
             android:fontFamily="sans-serif"
             android:letterSpacing="0.05" />
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
             <TextView
                 android:id="@+id/btnCheckPhoneHistory"
@@ -73,8 +75,9 @@
                 android:id="@+id/tvNewBadge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="-10dp"
-                android:layout_marginTop="-14dp"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="-10dp"
+                android:layout_marginEnd="-10dp"
                 android:background="@drawable/bg_new_badge"
                 android:text="@string/new_badge_text"
                 android:textColor="@color/text_on_primary"
@@ -91,7 +94,7 @@
                 android:clickable="false"
                 android:focusable="false" />
 
-        </LinearLayout>
+        </FrameLayout>
 
         <LinearLayout
             android:id="@+id/whatsappCheckBlock"
