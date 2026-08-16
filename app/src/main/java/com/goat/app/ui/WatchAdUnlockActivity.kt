@@ -34,8 +34,7 @@ class WatchAdUnlockActivity : AppCompatActivity() {
         const val PREFS_NAME = "goat_unlock_prefs"
         const val KEY_LAST_UNLOCK_TIME = "last_unlock_time"
 
-        // TESTING VALUE: 1 minute. Change back to 3 hours (3L * 60 * 60 * 1000) once testing is done.
-        const val UNLOCK_WINDOW_MS = 60_000L
+        const val UNLOCK_WINDOW_MS = 3L * 60 * 1000
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
