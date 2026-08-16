@@ -702,8 +702,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         val now = System.currentTimeMillis()
 
         if (now - lastImpressionTime < IMPRESSION_COOLDOWN_MS) {
-
-            hideAdSlot()
             return
         }
 
@@ -798,10 +796,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         binding.nativeAdContainer.root.visibility = View.INVISIBLE
         binding.adShimmerLoader.visibility = View.GONE
         binding.tvNoSponsorship.visibility = View.VISIBLE
-    }
-
-    private fun hideAdSlot() {
-
     }
 
     private fun populateNativeAdView(nativeAd: NativeAd) {
