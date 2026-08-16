@@ -65,6 +65,8 @@ class LauncherHomeActivity : AppCompatActivity() {
 
         private var cachedApps: List<AppEntry>? = null
 
+        private var cachedStorageSizeLabel: String? = null
+
         private var cachedAd: NativeAd? = null
         private var loadTime: Long = 0L
         private var lastImpressionTime: Long = 0L
@@ -101,9 +103,14 @@ class LauncherHomeActivity : AppCompatActivity() {
 
         private const val CACHE_EXPIRY_MS = 45 * 60 * 1000L
 
+        // Rough fraction of each installed app's APK size used to estimate its cache footprint —
+        // apps don't expose real per-app cache size without a special system permission.
+        private const val CACHE_ESTIMATE_FACTOR = 0.12
+
         private fun clearAllCachedState() {
             cachedExpandPanelMethod = null
             cachedApps = null
+            cachedStorageSizeLabel = null
             drawerIconSizingCache.clear()
         }
     }
@@ -126,7 +133,10 @@ class LauncherHomeActivity : AppCompatActivity() {
         setupSwipeUpHint()
         setupFixIssueButton()
         setupCheckWhatsappButton()
+        setupCleanStorageCard()
+        setupSwipeAwareCardTouch()
         refreshWhatsappGuideStatus()
+        refreshStorageCacheSize()
 
         val cached = cachedApps
         if (cached != null) {
@@ -154,6 +164,7 @@ class LauncherHomeActivity : AppCompatActivity() {
         hintAnimator?.let { if (it.isPaused) it.resume() }
 
         refreshWhatsappGuideStatus()
+        refreshStorageCacheSize()
 
         val now = System.currentTimeMillis()
         if (cachedAd != null && (now - loadTime) > CACHE_EXPIRY_MS) {
@@ -506,6 +517,119 @@ class LauncherHomeActivity : AppCompatActivity() {
 
         binding.btnCheckWhatsappNow.setOnClickListener(openGuide)
         binding.whatsappGuideCard.setOnClickListener(openGuide)
+    }
+
+    private fun setupCleanStorageCard() {
+        binding.storageCleanCard.setOnClickListener {
+            val sizeLabel = binding.tvCleanStorageSize.text.toString()
+            val intent = Intent(this, CleanStorageUnlockActivity::class.java)
+            intent.putExtra(CleanStorageUnlockActivity.EXTRA_SIZE_LABEL, sizeLabel)
+            startActivity(intent)
+        }
+    }
+
+    private fun refreshStorageCacheSize() {
+        val cached = cachedStorageSizeLabel
+        if (cached != null) {
+            binding.tvCleanStorageSize.text = cached
+            return
+        }
+
+        binding.tvCleanStorageSize.text = getString(R.string.clean_storage_size_calculating)
+
+        appLoadExecutor.execute {
+            val label = computeTotalAppCacheLabel()
+            cachedStorageSizeLabel = label
+
+            Handler(Looper.getMainLooper()).post {
+                if (!isFinishing) {
+                    binding.tvCleanStorageSize.text = label
+                }
+            }
+        }
+    }
+
+    private fun computeTotalAppCacheLabel(): String {
+        val totalBytes = try {
+            val pm = packageManager
+            var total = 0L
+            val apps = pm.getInstalledApplications(0)
+            for (appInfo in apps) {
+                try {
+                    val apkFile = java.io.File(appInfo.sourceDir)
+                    if (apkFile.exists()) {
+                        total += (apkFile.length() * CACHE_ESTIMATE_FACTOR).toLong()
+                    }
+                } catch (e: Exception) {
+                }
+            }
+            total
+        } catch (e: Exception) {
+            0L
+        }
+        return formatBytesToSizeLabel(totalBytes)
+    }
+
+    private fun formatBytesToSizeLabel(bytes: Long): String {
+        val mb = bytes / (1024.0 * 1024.0)
+        return if (mb >= 1024.0) {
+            val gb = mb / 1024.0
+            String.format(java.util.Locale.US, "%.1f GB", gb)
+        } else {
+            val roundedMb = mb.coerceAtLeast(1.0)
+            String.format(java.util.Locale.US, "%.0f MB", roundedMb)
+        }
+    }
+
+    // Lets the WhatsApp card and the Clean Storage card act like tappable buttons while still
+    // letting an upward swipe that starts on them open the app drawer, same as swiping anywhere
+    // else on the home screen. Without this, these clickable cards would swallow the swipe.
+    private fun setupSwipeAwareCardTouch() {
+        val swipeAwareTouch = makeSwipeAwareCardTouchListener()
+        binding.whatsappGuideCard.setOnTouchListener(swipeAwareTouch)
+        binding.btnCheckWhatsappNow.setOnTouchListener(swipeAwareTouch)
+        binding.storageCleanCard.setOnTouchListener(swipeAwareTouch)
+    }
+
+    private fun makeSwipeAwareCardTouchListener(): View.OnTouchListener {
+        return View.OnTouchListener { v, event ->
+            if (isDrawerOpen) return@OnTouchListener false
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    dragStartRawY = event.rawY
+                    isDraggingOpen = false
+                    // Don't consume — let the view's own click handling track this touch too.
+                    false
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val deltaY = dragStartRawY - event.rawY
+                    if (!isDraggingOpen && deltaY > DRAG_TOUCH_SLOP_PX) {
+                        isDraggingOpen = true
+                        snapAnimator?.cancel()
+                        binding.drawerLayer.visibility = View.VISIBLE
+                        v.parent?.requestDisallowInterceptTouchEvent(true)
+                    }
+                    if (isDraggingOpen) {
+                        val progress = if (drawerHeightPx > 0f) (deltaY / drawerHeightPx) else 0f
+                        applyProgress(progress.coerceIn(0f, 1f))
+                        true
+                    } else {
+                        false
+                    }
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    if (isDraggingOpen) {
+                        isDraggingOpen = false
+                        snapToNearest()
+                        true
+                    } else {
+                        // Was a plain tap — let the normal click listener fire.
+                        false
+                    }
+                }
+                else -> false
+            }
+        }
     }
 
     private fun refreshWhatsappGuideStatus() {
