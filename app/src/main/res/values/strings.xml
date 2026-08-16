@@ -62,4 +62,8 @@
 
     <string name="guide_step5_title">उसे Log Out कर दें</string>
     <string name="guide_step5_body">उस डिवाइस को तुरंत हटाने के लिए "Log Out" बटन दबाएं</string>
+
+    <string name="charging_label">Charging</string>
+    <string name="charging_percent_placeholder">0%</string>
+    <string name="charging_percent_format">%1$d%%</string>
 </resources>
