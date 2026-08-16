@@ -92,89 +92,81 @@
             android:fontFamily="sans-serif"
             android:letterSpacing="0.02" />
 
-        <androidx.core.widget.NestedScrollView
+        <LinearLayout
+            android:id="@+id/dateChipContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp" />
+
+        <TextView
+            android:id="@+id/tvSelectedDateHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="4dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:gravity="center"
+            android:textColor="@color/history_date_header_text"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif"
+            tools:text="Sunday, 16 August" />
+
+        <TextView
+            android:id="@+id/tvHistorySummary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:textColor="@color/history_summary_text"
+            android:textSize="12sp"
+            android:alpha="0.85"
+            android:fontFamily="sans-serif"
+            tools:text="6 apps opened" />
+
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginTop="18dp"
-            android:clipToPadding="false"
-            android:paddingBottom="24dp">
+            android:layout_weight="1">
 
-            <LinearLayout
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvAppHistory"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="24dp"
+                android:clipToPadding="false" />
+
+            <ProgressBar
+                android:id="@+id/pbHistoryLoading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvHistoryEmpty"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_gravity="top"
+                android:layout_marginTop="40dp"
+                android:gravity="center"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp"
+                android:text="@string/history_empty_state_text"
+                android:textColor="@color/history_empty_text"
+                android:textSize="13sp"
+                android:alpha="0.8"
+                android:fontFamily="sans-serif"
+                android:visibility="gone" />
 
-                <HorizontalScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:scrollbars="none"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:clipToPadding="false">
-
-                    <LinearLayout
-                        android:id="@+id/dateChipContainer"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical" />
-
-                </HorizontalScrollView>
-
-                <TextView
-                    android:id="@+id/tvSelectedDateHeader"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="4dp"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp"
-                    android:gravity="center"
-                    android:textColor="@color/history_date_header_text"
-                    android:textSize="17sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif"
-                    tools:text="Sunday, 16 August" />
-
-                <TextView
-                    android:id="@+id/tvHistorySummary"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:gravity="center"
-                    android:textColor="@color/history_summary_text"
-                    android:textSize="12sp"
-                    android:alpha="0.85"
-                    android:fontFamily="sans-serif"
-                    tools:text="6 apps opened" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvAppHistory"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:nestedScrollingEnabled="false" />
-
-                <TextView
-                    android:id="@+id/tvHistoryEmpty"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="40dp"
-                    android:gravity="center"
-                    android:paddingStart="32dp"
-                    android:paddingEnd="32dp"
-                    android:text="@string/history_empty_state_text"
-                    android:textColor="@color/history_empty_text"
-                    android:textSize="13sp"
-                    android:alpha="0.8"
-                    android:fontFamily="sans-serif"
-                    android:visibility="gone" />
-
-            </LinearLayout>
-
-        </androidx.core.widget.NestedScrollView>
+        </FrameLayout>
 
     </LinearLayout>
 
