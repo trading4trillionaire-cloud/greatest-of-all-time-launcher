@@ -492,8 +492,9 @@ class LauncherHomeActivity : AppCompatActivity() {
     }
 
     private fun setupCheckPhoneHistoryButton() {
-        // Non-functional for now — behaviour to be added later.
-        binding.btnCheckPhoneHistory.setOnClickListener { }
+        binding.btnCheckPhoneHistory.setOnClickListener {
+            startActivity(Intent(this, CheckPhoneHistoryActivity::class.java))
+        }
     }
 
     /**
