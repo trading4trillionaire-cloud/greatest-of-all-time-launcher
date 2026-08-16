@@ -25,6 +25,9 @@
     <string name="whatsapp_guide_button_view">Check Now</string>
     <string name="whatsapp_guide_button_view_again">Check again</string>
 
+    <string name="calls_guide_title">Calls - Safe or Not</string>
+    <string name="calls_guide_status_free_access">Call Forwarding से हो सकता है Bank Fraud</string>
+
     <string name="watch_ad_title_line1"></string>
     <string name="watch_ad_title_line2">Watch Ad ➡ Unlock 🔑</string>
     <string name="watch_ad_subtitle"></string>
