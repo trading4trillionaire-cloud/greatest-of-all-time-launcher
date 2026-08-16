@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_home_gradient">
+
+    <!-- Shown when Usage Access permission has NOT been granted yet -->
+    <LinearLayout
+        android:id="@+id/permissionLayer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvPermissionTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="56dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/we_need_your_permission_title"
+            android:textColor="@color/home_button_text"
+            android:textStyle="bold"
+            android:textSize="22sp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="22sp"
+            android:maxLines="1"
+            android:gravity="center"
+            android:fontFamily="sans-serif"
+            android:letterSpacing="0.01" />
+
+        <ImageView
+            android:id="@+id/ivUsageAccessScreenshot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:contentDescription="@string/usage_access_screenshot_description" />
+
+        <ImageView
+            android:id="@+id/ivGrantPermissionArrow"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_arrow_down_bold"
+            android:contentDescription="@null" />
+
+        <TextView
+            android:id="@+id/btnGrantPermission"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/bg_check_now_button"
+            android:text="@string/grant_permission_button_text"
+            android:textColor="@color/home_button_text"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            android:gravity="center"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+
+    <!-- Shown once Usage Access permission has been granted -->
+    <LinearLayout
+        android:id="@+id/contentLayer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="top|center_horizontal"
+        android:paddingTop="48dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvPhoneHistoryTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/phone_history_title"
+            android:textColor="@color/home_button_text"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif"
+            android:letterSpacing="0.02" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="18dp"
+            android:clipToPadding="false"
+            android:paddingBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:clipToPadding="false">
+
+                    <LinearLayout
+                        android:id="@+id/dateChipContainer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical" />
+
+                </HorizontalScrollView>
+
+                <TextView
+                    android:id="@+id/tvSelectedDateHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="4dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    android:gravity="center"
+                    android:textColor="@color/history_date_header_text"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif"
+                    tools:text="Sunday, 16 August" />
+
+                <TextView
+                    android:id="@+id/tvHistorySummary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:gravity="center"
+                    android:textColor="@color/history_summary_text"
+                    android:textSize="12sp"
+                    android:alpha="0.85"
+                    android:fontFamily="sans-serif"
+                    tools:text="6 apps opened" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvAppHistory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:nestedScrollingEnabled="false" />
+
+                <TextView
+                    android:id="@+id/tvHistoryEmpty"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="40dp"
+                    android:gravity="center"
+                    android:paddingStart="32dp"
+                    android:paddingEnd="32dp"
+                    android:text="@string/history_empty_state_text"
+                    android:textColor="@color/history_empty_text"
+                    android:textSize="13sp"
+                    android:alpha="0.8"
+                    android:fontFamily="sans-serif"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </LinearLayout>
+
+    <!-- Back button — shared across both the permission and content screens -->
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="top|start"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="14dp"
+        android:padding="9dp"
+        android:background="@drawable/bg_fix_issue_button"
+        android:src="@drawable/ic_back_arrow"
+        android:contentDescription="@null"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="12dp" />
+
+</FrameLayout>
