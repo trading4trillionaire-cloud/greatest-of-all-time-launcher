@@ -9,6 +9,7 @@
 
     <string name="whatsapp_guide_title">WhatsApp Safety Guide</string>
     <string name="whatsapp_guide_status_not_viewed">Not viewed yet</string>
+    <string name="whatsapp_guide_status_free_access">Free to view — no ad required</string>
     <string name="whatsapp_guide_status_viewed_format">Viewed %1$s ago</string>
     <string name="whatsapp_guide_button_view">Check Now</string>
     <string name="whatsapp_guide_button_view_again">Check again</string>
