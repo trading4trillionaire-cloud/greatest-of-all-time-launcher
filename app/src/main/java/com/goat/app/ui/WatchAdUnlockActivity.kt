@@ -22,13 +22,10 @@ class WatchAdUnlockActivity : AppCompatActivity() {
     private var isLoadingAd = false
     private var isAdInitialized = false
 
-    // True when the user tapped Continue before the ad had finished loading —
-    // once the ad loads we show it automatically instead of leaving them stuck.
     private var showAdOnceLoaded = false
 
     companion object {
 
-        // Google's official TEST rewarded ad unit ID — always returns a test ad, never a real one.
         private const val REWARDED_AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917"
 
         const val PREFS_NAME = "goat_unlock_prefs"
@@ -100,7 +97,6 @@ class WatchAdUnlockActivity : AppCompatActivity() {
             return
         }
 
-        // Ad isn't ready yet — mark intent to show it as soon as it loads, and (re)trigger a load.
         showAdOnceLoaded = true
         Toast.makeText(this, "Ad load ho raha hai...", Toast.LENGTH_SHORT).show()
 
