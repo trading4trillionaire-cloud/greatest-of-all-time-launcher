@@ -11,6 +11,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ResolveInfo
+import android.os.BatteryManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
@@ -58,6 +59,9 @@ class LauncherHomeActivity : AppCompatActivity() {
     private val appLoadExecutor = Executors.newSingleThreadExecutor()
 
     private var packageChangeReceiver: BroadcastReceiver? = null
+
+    private var chargingReceiver: BroadcastReceiver? = null
+    private var isChargingUiVisible = false
 
     companion object {
 
@@ -158,6 +162,7 @@ class LauncherHomeActivity : AppCompatActivity() {
         hintAnimator?.let { if (it.isPaused) it.resume() }
 
         refreshWhatsappGuideStatus()
+        registerChargingReceiver()
 
         val now = System.currentTimeMillis()
         if (cachedAd != null && (now - loadTime) > CACHE_EXPIRY_MS) {
@@ -175,6 +180,8 @@ class LauncherHomeActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
 
+        unregisterChargingReceiver()
+
         if (currentProgress > 0f && currentProgress < 1f) {
             snapAnimator?.cancel()
             val finalProgress = if (isDrawerOpen) 1f else 0f
@@ -188,6 +195,75 @@ class LauncherHomeActivity : AppCompatActivity() {
         }
 
         hintAnimator?.pause()
+    }
+
+    private fun registerChargingReceiver() {
+        if (chargingReceiver != null) return
+
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                applyBatteryState(intent)
+            }
+        }
+
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_BATTERY_CHANGED)
+            addAction(Intent.ACTION_POWER_CONNECTED)
+            addAction(Intent.ACTION_POWER_DISCONNECTED)
+        }
+
+        // registerReceiver with ACTION_BATTERY_CHANGED in the filter returns the last
+        // sticky broadcast immediately, so we get the current charging state/level
+        // right away without polling anything.
+        val stickyIntent = registerReceiver(receiver, filter)
+        chargingReceiver = receiver
+
+        if (stickyIntent != null) {
+            applyBatteryState(stickyIntent)
+        }
+    }
+
+    private fun unregisterChargingReceiver() {
+        chargingReceiver?.let {
+            try {
+                unregisterReceiver(it)
+            } catch (e: IllegalArgumentException) {
+                // already unregistered, ignore
+            }
+        }
+        chargingReceiver = null
+    }
+
+    private fun applyBatteryState(intent: Intent) {
+        val plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
+        val isCharging = plugged != 0
+
+        if (isCharging) {
+            val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+            val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+            val percent = if (level >= 0 && scale > 0) (level * 100) / scale else -1
+
+            if (percent >= 0) {
+                binding.tvChargingPercent.text = getString(R.string.charging_percent_format, percent)
+            }
+            showChargingUi()
+        } else {
+            hideChargingUi()
+        }
+    }
+
+    private fun showChargingUi() {
+        if (isChargingUiVisible) return
+        isChargingUiVisible = true
+        binding.whatsappCheckBlock.visibility = View.GONE
+        binding.chargingBlock.visibility = View.VISIBLE
+    }
+
+    private fun hideChargingUi() {
+        if (!isChargingUiVisible) return
+        isChargingUiVisible = false
+        binding.chargingBlock.visibility = View.GONE
+        binding.whatsappCheckBlock.visibility = View.VISIBLE
     }
 
     private fun setupSwipeUpHint() {
