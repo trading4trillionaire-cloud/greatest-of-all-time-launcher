@@ -28,6 +28,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.goat.app.R
 import com.goat.app.databinding.ActivityLauncherHomeBinding
 import java.util.concurrent.Executors
 import com.google.android.gms.ads.AdListener
@@ -125,6 +126,7 @@ class LauncherHomeActivity : AppCompatActivity() {
         setupSwipeUpHint()
         setupFixIssueButton()
         setupCheckWhatsappButton()
+        refreshWhatsappGuideStatus()
 
         val cached = cachedApps
         if (cached != null) {
@@ -150,6 +152,8 @@ class LauncherHomeActivity : AppCompatActivity() {
         super.onResume()
 
         hintAnimator?.let { if (it.isPaused) it.resume() }
+
+        refreshWhatsappGuideStatus()
 
         val now = System.currentTimeMillis()
         if (cachedAd != null && (now - loadTime) > CACHE_EXPIRY_MS) {
@@ -486,7 +490,7 @@ class LauncherHomeActivity : AppCompatActivity() {
     }
 
     private fun setupCheckWhatsappButton() {
-        binding.btnCheckWhatsappNow.setOnClickListener {
+        val openGuide = View.OnClickListener {
             val prefs = getSharedPreferences(WatchAdUnlockActivity.PREFS_NAME, Context.MODE_PRIVATE)
             val lastUnlockTime = prefs.getLong(WatchAdUnlockActivity.KEY_LAST_UNLOCK_TIME, 0L)
             val elapsed = System.currentTimeMillis() - lastUnlockTime
@@ -498,6 +502,44 @@ class LauncherHomeActivity : AppCompatActivity() {
                 // Window expired (or never unlocked) — needs to watch the ad again.
                 startActivity(Intent(this, WatchAdUnlockActivity::class.java))
             }
+        }
+
+        binding.btnCheckWhatsappNow.setOnClickListener(openGuide)
+        binding.whatsappGuideCard.setOnClickListener(openGuide)
+    }
+
+    private fun refreshWhatsappGuideStatus() {
+        val prefs = getSharedPreferences(WatchAdUnlockActivity.PREFS_NAME, Context.MODE_PRIVATE)
+        val lastUnlockTime = prefs.getLong(WatchAdUnlockActivity.KEY_LAST_UNLOCK_TIME, 0L)
+
+        if (lastUnlockTime <= 0L) {
+            binding.tvWhatsappCheckSubtitle.text =
+                getString(R.string.whatsapp_guide_status_not_viewed)
+            binding.btnCheckWhatsappNow.text =
+                getString(R.string.whatsapp_guide_button_view)
+        } else {
+            val elapsed = (System.currentTimeMillis() - lastUnlockTime).coerceAtLeast(0L)
+            val compactTime = formatCompactTimeAgo(elapsed)
+            binding.tvWhatsappCheckSubtitle.text = if (compactTime == null) {
+                "Viewed just now"
+            } else {
+                getString(R.string.whatsapp_guide_status_viewed_format, compactTime)
+            }
+            binding.btnCheckWhatsappNow.text =
+                getString(R.string.whatsapp_guide_button_view_again)
+        }
+    }
+
+    private fun formatCompactTimeAgo(elapsedMs: Long): String? {
+        val minutes = elapsedMs / 60_000L
+        val hours = elapsedMs / 3_600_000L
+        val days = elapsedMs / 86_400_000L
+
+        return when {
+            minutes < 1L -> null
+            minutes < 60L -> "${minutes}m"
+            hours < 24L -> "${hours}h"
+            else -> "${days}d"
         }
     }
 
