@@ -28,7 +28,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import android.widget.ImageView
+import androidx.viewpager2.widget.ViewPager2
+import com.goat.app.R
 import com.goat.app.databinding.ActivityLauncherHomeBinding
+import com.goat.app.model.FeatureCardItem
 import java.util.concurrent.Executors
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader
@@ -124,7 +128,7 @@ class LauncherHomeActivity : AppCompatActivity() {
         setupDrawer()
         setupSwipeUpHint()
         setupFixIssueButton()
-        setupCheckWhatsappButton()
+        setupFeatureCarousel()
 
         val cached = cachedApps
         if (cached != null) {
@@ -485,20 +489,82 @@ class LauncherHomeActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupCheckWhatsappButton() {
-        binding.btnCheckWhatsappNow.setOnClickListener {
-            val prefs = getSharedPreferences(WatchAdUnlockActivity.PREFS_NAME, Context.MODE_PRIVATE)
-            val lastUnlockTime = prefs.getLong(WatchAdUnlockActivity.KEY_LAST_UNLOCK_TIME, 0L)
-            val elapsed = System.currentTimeMillis() - lastUnlockTime
+    private fun setupFeatureCarousel() {
+        val items = buildFeatureCarouselItems()
 
-            if (elapsed in 0 until WatchAdUnlockActivity.UNLOCK_WINDOW_MS) {
-                // Still within the unlock window — skip the ad, go straight to the content.
-                startActivity(Intent(this, UnlockedContentActivity::class.java))
-            } else {
-                // Window expired (or never unlocked) — needs to watch the ad again.
-                startActivity(Intent(this, WatchAdUnlockActivity::class.java))
+        binding.vpFeatureCarousel.adapter = FeatureCardAdapter(items)
+        binding.vpFeatureCarousel.offscreenPageLimit = 1
+
+        setupFeatureCarouselDots(items.size)
+    }
+
+    private fun buildFeatureCarouselItems(): List<FeatureCardItem> {
+        return listOf(
+            FeatureCardItem(
+                id = "whatsapp_check",
+                iconRes = R.drawable.ic_whatsapp,
+                title = getString(R.string.whatsapp_check_title_line1),
+                statusText = getString(R.string.whatsapp_check_title_line2),
+                statusBgColor = getColor(R.color.feature_status_risk_bg),
+                ctaText = getString(R.string.whatsapp_check_button_text),
+                onCtaClick = { onCheckWhatsappClicked() }
+            )
+        )
+    }
+
+    private fun onCheckWhatsappClicked() {
+        val prefs = getSharedPreferences(WatchAdUnlockActivity.PREFS_NAME, Context.MODE_PRIVATE)
+        val lastUnlockTime = prefs.getLong(WatchAdUnlockActivity.KEY_LAST_UNLOCK_TIME, 0L)
+        val elapsed = System.currentTimeMillis() - lastUnlockTime
+
+        if (elapsed in 0 until WatchAdUnlockActivity.UNLOCK_WINDOW_MS) {
+            // Still within the unlock window — skip the ad, go straight to the content.
+            startActivity(Intent(this, UnlockedContentActivity::class.java))
+        } else {
+            // Window expired (or never unlocked) — needs to watch the ad again.
+            startActivity(Intent(this, WatchAdUnlockActivity::class.java))
+        }
+    }
+
+    private fun setupFeatureCarouselDots(count: Int) {
+        val dotsContainer = binding.featureCarouselDots
+        dotsContainer.removeAllViews()
+
+        if (count <= 1) {
+            dotsContainer.visibility = View.GONE
+            return
+        }
+
+        dotsContainer.visibility = View.VISIBLE
+
+        val density = resources.displayMetrics.density
+        val dotSizePx = (8 * density).toInt()
+        val dotMarginPx = (4 * density).toInt()
+
+        val dots = (0 until count).map { index ->
+            ImageView(this).apply {
+                layoutParams = android.widget.LinearLayout.LayoutParams(dotSizePx, dotSizePx).apply {
+                    marginStart = dotMarginPx
+                    marginEnd = dotMarginPx
+                }
+                setImageResource(
+                    if (index == 0) R.drawable.dot_indicator_active
+                    else R.drawable.dot_indicator_inactive
+                )
+                dotsContainer.addView(this)
             }
         }
+
+        binding.vpFeatureCarousel.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                dots.forEachIndexed { index, dot ->
+                    dot.setImageResource(
+                        if (index == position) R.drawable.dot_indicator_active
+                        else R.drawable.dot_indicator_inactive
+                    )
+                }
+            }
+        })
     }
 
     private fun performFreshRestart() {
