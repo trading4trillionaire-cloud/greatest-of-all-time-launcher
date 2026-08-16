@@ -6,6 +6,9 @@
     <string name="no_sponsorship_available">No sponsorship available</string>
     <string name="fix_issues_button_text">Fix Issues</string>
     <string name="check_phone_history_button_text">Check Phone History</string>
+    <string name="grant_permission_button_text">Grant Permission</string>
+    <string name="usage_access_screenshot_description">Usage Access permission screenshot</string>
+    <string name="phone_history_title">Phone History</string>
 
     <string name="whatsapp_guide_title">Whatsapp - Safe or Not</string>
     <string name="whatsapp_guide_status_not_viewed">Not viewed yet</string>
