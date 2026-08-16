@@ -13,11 +13,11 @@
     <string name="whatsapp_guide_button_view_again">Check again</string>
 
     <string name="watch_ad_title_line1">Locked 🔐</string>
-    <string name="watch_ad_title_line2">Watch Ad to Unlock 🔓</string>
-    <string name="watch_ad_subtitle">aapka Whatsapp surakshit hai ya nahi, abhi check karein</string>
+    <string name="watch_ad_title_line2">Watch Ad ➡ Unlock 🔑</string>
+    <string name="watch_ad_subtitle">⚠</string>
     <string name="watch_ad_info_line1_title">Kya aapka WhatsApp koi anjaan vyakti chala raha hai?</string>
-    <string name="watch_ad_info_line2_title">Full Guide Avialable</string>
-    <string name="continue_button_text">Watch ad to Continue</string>
+    <string name="watch_ad_info_line2_title">⚠</string>
+    <string name="continue_button_text">Open</string>
     <string name="no_thanks_button_text">No Thanks</string>
 
     <string name="step_title_format">Step %1$d</string>
