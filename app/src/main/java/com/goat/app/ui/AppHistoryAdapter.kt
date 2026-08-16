@@ -12,7 +12,8 @@ import com.goat.app.R
 data class AppHistoryEntry(
     val label: String,
     val icon: Drawable,
-    val timeText: String
+    val timeText: String,
+    val openCount: Int
 )
 
 class AppHistoryAdapter(
@@ -35,7 +36,10 @@ class AppHistoryAdapter(
         val entry = entries[position]
         holder.icon.setImageDrawable(entry.icon)
         holder.label.text = entry.label
-        holder.time.text = entry.timeText
+        holder.time.text = holder.itemView.context.getString(
+            R.string.history_open_count_format,
+            entry.openCount
+        )
     }
 
     override fun getItemCount(): Int = entries.size
