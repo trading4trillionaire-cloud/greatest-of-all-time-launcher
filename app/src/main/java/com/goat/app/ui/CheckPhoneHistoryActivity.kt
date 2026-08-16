@@ -42,8 +42,8 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
 
     // Raw usage events are fetched from the system only once per screen visit;
     // switching between date chips afterwards just filters this cache.
-    private var cachedEntries: List<RawHistoryEntry>? = null
-    private var isFetchingHistory = false
+    private var allSevenDayEntries: List<RawHistoryEntry>? = null
+    private var isFetchInProgress = false
 
     private data class DateOption(
         val label: String,
@@ -110,7 +110,7 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
         binding.contentLayer.visibility = View.VISIBLE
         renderDateChips()
 
-        val cached = cachedEntries
+        val cached = allSevenDayEntries
         if (cached == null) {
             fetchAllHistoryOnce()
         } else {
@@ -259,7 +259,7 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
                 if (selectedDateIndex != index) {
                     selectedDateIndex = index
                     renderDateChips()
-                    val cached = cachedEntries
+                    val cached = allSevenDayEntries
                     if (cached != null) {
                         applyFilterForSelectedDate(cached)
                     }
@@ -282,11 +282,11 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
      * one-time fetch is in progress.
      */
     private fun fetchAllHistoryOnce() {
-        if (isFetchingHistory) return
+        if (isFetchInProgress) return
         val oldestOption = dateOptions.lastOrNull() ?: return
         val newestOption = dateOptions.firstOrNull() ?: return
 
-        isFetchingHistory = true
+        isFetchInProgress = true
         val requestId = ++loadRequestId
 
         binding.progressHistoryLoading.visibility = View.VISIBLE
@@ -299,11 +299,11 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
             val entries = queryCollapsedHistory(oldestOption.startMillis, newestOption.endMillis)
 
             mainHandler.post {
-                isFetchingHistory = false
+                isFetchInProgress = false
                 if (isFinishing || isDestroyed || requestId != loadRequestId) return@post
 
                 binding.progressHistoryLoading.visibility = View.GONE
-                cachedEntries = entries
+                allSevenDayEntries = entries
                 applyFilterForSelectedDate(entries)
             }
         }
