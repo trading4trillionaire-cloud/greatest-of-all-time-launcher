@@ -188,35 +188,25 @@
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1.5dp"
-                        android:layout_weight="1"
-                        android:layerType="software"
-                        android:background="@drawable/bg_dashed_line" />
+                    android:gravity="center">
 
                     <TextView
                         android:id="@+id/tvFeaturesLabel"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/bg_features_label"
                         android:text="@string/features_nav_label"
                         android:textColor="@color/home_button_text"
                         android:textSize="14sp"
                         android:textStyle="bold"
+                        android:textAllCaps="false"
                         android:gravity="center"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="10dp"
                         android:fontFamily="sans-serif"
-                        android:letterSpacing="0.03" />
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1.5dp"
-                        android:layout_weight="1"
-                        android:layerType="software"
-                        android:background="@drawable/bg_dashed_line" />
+                        android:letterSpacing="0.03"
+                        android:clickable="false"
+                        android:focusable="false" />
 
                 </LinearLayout>
 
