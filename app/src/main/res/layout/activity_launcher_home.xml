@@ -160,6 +160,53 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/featuresNavRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/btnFeaturesLeft"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_nav_arrow_button"
+                    android:src="@drawable/ic_back_arrow"
+                    android:padding="10dp"
+                    android:scaleType="fitCenter"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="@string/features_nav_label" />
+
+                <TextView
+                    android:id="@+id/tvFeaturesLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/features_nav_label"
+                    android:textColor="@color/home_button_text"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:fontFamily="sans-serif"
+                    android:letterSpacing="0.03" />
+
+                <ImageView
+                    android:id="@+id/btnFeaturesRight"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_nav_arrow_button"
+                    android:src="@drawable/ic_forward_arrow"
+                    android:padding="10dp"
+                    android:scaleType="fitCenter"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="@string/features_nav_label" />
+
+            </LinearLayout>
+
         </LinearLayout>
 
     </LinearLayout>
