@@ -15,6 +15,7 @@
     <string name="history_summary_format_singular">%1$d app opened</string>
     <string name="history_date_today">Today</string>
     <string name="history_date_yesterday">Yesterday</string>
+    <string name="history_open_count_format">%1$d×</string>
 
     <string name="whatsapp_guide_title">Whatsapp - Safe or Not</string>
     <string name="whatsapp_guide_status_not_viewed">Not viewed yet</string>
