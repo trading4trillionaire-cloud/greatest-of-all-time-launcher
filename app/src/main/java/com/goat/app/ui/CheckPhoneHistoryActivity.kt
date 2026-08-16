@@ -40,8 +40,6 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
     private var selectedDateIndex = 0
     private var loadRequestId = 0
 
-    // Raw usage events are fetched from the system only once per screen visit;
-    // switching between date chips afterwards just filters this cache.
     private var allSevenDayEntries: List<RawHistoryEntry>? = null
     private var isFetchInProgress = false
 
@@ -182,8 +180,6 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
         finish()
     }
 
-    // ---------- Date chips ----------
-
     private fun buildDateOptions() {
         dateOptions.clear()
         val calendar = Calendar.getInstance()
@@ -221,8 +217,7 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
         val container = binding.dateChipContainer
 
         if (dateChipViews.isNotEmpty()) {
-            // Chips already exist — just restyle them for the new selection,
-            // don't rebuild the row (avoids a visible delay on tap).
+
             dateChipViews.forEachIndexed { index, chip ->
                 styleChip(chip, isSelected = index == selectedDateIndex)
             }
@@ -266,8 +261,7 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
                     if (cached != null) {
                         applyFilterForSelectedDate(cached)
                     }
-                    // If the initial fetch hasn't finished yet, the spinner is still
-                    // showing and the selection will be applied once it completes.
+
                 }
             }
 
@@ -292,15 +286,6 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
         )
     }
 
-    // ---------- History list ----------
-
-    /**
-     * Fetches usage history from the system exactly once per screen visit,
-     * covering the entire range shown by the date chips. Switching between
-     * date chips afterwards never touches the system again — it only
-     * filters this cached list. A white spinner is shown while this
-     * one-time fetch is in progress.
-     */
     private fun fetchAllHistoryOnce() {
         if (isFetchInProgress) return
         val oldestOption = dateOptions.lastOrNull() ?: return
@@ -329,10 +314,6 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Filters the already-fetched cache down to the currently selected date
-     * chip and renders it. No system/usage-stats query happens here.
-     */
     private fun applyFilterForSelectedDate(cached: List<RawHistoryEntry>) {
         val option = dateOptions.getOrNull(selectedDateIndex) ?: return
 
@@ -355,17 +336,6 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Reads raw foreground-app events for the given time range, resolves
-     * each package into a display label + icon (no package names are ever
-     * shown), drops any that can't be resolved, and then collapses
-     * consecutive repeats of the same app into a single entry (keeping the
-     * earliest time of that run). Collapsing happens AFTER resolving so a
-     * hidden/unresolvable system package sitting between two opens of the
-     * same app doesn't prevent them from merging. Returned in chronological
-     * (oldest first) order with the timestamp preserved so callers can
-     * filter/sort per date.
-     */
     private fun queryCollapsedHistory(startMillis: Long, endMillis: Long): List<RawHistoryEntry> {
         val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
             ?: return emptyList()
@@ -393,9 +363,6 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
         val pm = packageManager
         val timeFormatter = SimpleDateFormat("h:mm a", Locale.getDefault())
 
-        // Resolve every event first; drop packages whose label/icon can't be
-        // resolved (e.g. hidden system components) so they don't sit between
-        // two entries of the same app and block them from merging below.
         data class Resolved(val pkg: String, val label: String, val icon: Drawable, val timestamp: Long)
 
         val resolved = rawEvents.mapNotNull { (pkg, timestamp) ->
@@ -414,16 +381,13 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
             }
         }
 
-        // Now collapse consecutive repeats of the same app on the already
-        // resolved+filtered list, keeping the earliest timestamp of each run.
         val collapsed = mutableListOf<Resolved>()
         for (item in resolved) {
             val last = collapsed.lastOrNull()
             if (last == null || last.pkg != item.pkg) {
                 collapsed.add(item)
             }
-            // else: same app repeated right after the previous entry — skip it,
-            // the earlier (already added) occurrence's timestamp is kept.
+
         }
 
         return collapsed.map { entry ->
