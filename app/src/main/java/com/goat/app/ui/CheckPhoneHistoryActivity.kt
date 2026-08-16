@@ -40,10 +40,22 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
     private var selectedDateIndex = 0
     private var loadRequestId = 0
 
+    // Raw usage events are fetched from the system only once per screen visit;
+    // switching between date chips afterwards just filters this cache.
+    private var cachedEntries: List<RawHistoryEntry>? = null
+    private var isFetchingHistory = false
+
     private data class DateOption(
         val label: String,
         val startMillis: Long,
         val endMillis: Long
+    )
+
+    private data class RawHistoryEntry(
+        val label: String,
+        val icon: Drawable,
+        val timestamp: Long,
+        val timeText: String
     )
 
     companion object {
@@ -97,7 +109,13 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
         binding.permissionLayer.visibility = View.GONE
         binding.contentLayer.visibility = View.VISIBLE
         renderDateChips()
-        loadHistoryForSelectedDate()
+
+        val cached = cachedEntries
+        if (cached == null) {
+            fetchAllHistoryOnce()
+        } else {
+            applyFilterForSelectedDate(cached)
+        }
     }
 
     private fun showPermissionScreen() {
@@ -241,7 +259,12 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
                 if (selectedDateIndex != index) {
                     selectedDateIndex = index
                     renderDateChips()
-                    loadHistoryForSelectedDate()
+                    val cached = cachedEntries
+                    if (cached != null) {
+                        applyFilterForSelectedDate(cached)
+                    }
+                    // If the initial fetch hasn't finished yet, the spinner is still
+                    // showing and the selection will be applied once it completes.
                 }
             }
 
@@ -251,42 +274,75 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
 
     // ---------- History list ----------
 
-    private fun loadHistoryForSelectedDate() {
-        val option = dateOptions.getOrNull(selectedDateIndex) ?: return
+    /**
+     * Fetches usage history from the system exactly once per screen visit,
+     * covering the entire range shown by the date chips. Switching between
+     * date chips afterwards never touches the system again — it only
+     * filters this cached list. A white spinner is shown while this
+     * one-time fetch is in progress.
+     */
+    private fun fetchAllHistoryOnce() {
+        if (isFetchingHistory) return
+        val oldestOption = dateOptions.lastOrNull() ?: return
+        val newestOption = dateOptions.firstOrNull() ?: return
+
+        isFetchingHistory = true
         val requestId = ++loadRequestId
 
-        binding.tvSelectedDateHeader.text =
-            SimpleDateFormat("EEEE, d MMMM", Locale.getDefault()).format(option.startMillis)
-        binding.tvHistorySummary.text = ""
+        binding.progressHistoryLoading.visibility = View.VISIBLE
         binding.rvAppHistory.adapter = AppHistoryAdapter(emptyList())
         binding.tvHistoryEmpty.visibility = View.GONE
+        binding.tvHistorySummary.text = ""
+        binding.tvSelectedDateHeader.text = ""
 
         bgExecutor.execute {
-            val entries = queryCollapsedHistory(option.startMillis, option.endMillis)
+            val entries = queryCollapsedHistory(oldestOption.startMillis, newestOption.endMillis)
 
             mainHandler.post {
+                isFetchingHistory = false
                 if (isFinishing || isDestroyed || requestId != loadRequestId) return@post
 
-                binding.rvAppHistory.adapter = AppHistoryAdapter(entries)
-                binding.tvHistoryEmpty.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
-                binding.tvHistorySummary.text = if (entries.isEmpty()) {
-                    ""
-                } else if (entries.size == 1) {
-                    getString(R.string.history_summary_format_singular, entries.size)
-                } else {
-                    getString(R.string.history_summary_format_plural, entries.size)
-                }
+                binding.progressHistoryLoading.visibility = View.GONE
+                cachedEntries = entries
+                applyFilterForSelectedDate(entries)
             }
         }
     }
 
     /**
-     * Reads raw foreground-app events for the given time range, collapses
-     * consecutive repeats of the same app into a single entry, resolves each
-     * package into a display label + icon (no package names are ever shown),
-     * and returns the list with the most recent app open first.
+     * Filters the already-fetched cache down to the currently selected date
+     * chip and renders it. No system/usage-stats query happens here.
      */
-    private fun queryCollapsedHistory(startMillis: Long, endMillis: Long): List<AppHistoryEntry> {
+    private fun applyFilterForSelectedDate(cached: List<RawHistoryEntry>) {
+        val option = dateOptions.getOrNull(selectedDateIndex) ?: return
+
+        binding.tvSelectedDateHeader.text =
+            SimpleDateFormat("EEEE, d MMMM", Locale.getDefault()).format(option.startMillis)
+
+        val entries = cached
+            .filter { it.timestamp in option.startMillis..option.endMillis }
+            .sortedByDescending { it.timestamp }
+            .map { AppHistoryEntry(label = it.label, icon = it.icon, timeText = it.timeText) }
+
+        binding.rvAppHistory.adapter = AppHistoryAdapter(entries)
+        binding.tvHistoryEmpty.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
+        binding.tvHistorySummary.text = if (entries.isEmpty()) {
+            ""
+        } else if (entries.size == 1) {
+            getString(R.string.history_summary_format_singular, entries.size)
+        } else {
+            getString(R.string.history_summary_format_plural, entries.size)
+        }
+    }
+
+    /**
+     * Reads raw foreground-app events for the given time range, collapses
+     * consecutive repeats of the same app into a single entry, and resolves
+     * each package into a display label + icon (no package names are ever
+     * shown). Returned in chronological (oldest first) order with the
+     * original timestamp preserved so callers can filter/sort per date.
+     */
+    private fun queryCollapsedHistory(startMillis: Long, endMillis: Long): List<RawHistoryEntry> {
         val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
             ?: return emptyList()
 
@@ -322,14 +378,15 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
         val pm = packageManager
         val timeFormatter = SimpleDateFormat("h:mm a", Locale.getDefault())
 
-        val entries = collapsed.mapNotNull { (pkg, timestamp) ->
+        return collapsed.mapNotNull { (pkg, timestamp) ->
             try {
                 val appInfo = pm.getApplicationInfo(pkg, 0)
                 val label = pm.getApplicationLabel(appInfo).toString()
                 val icon: Drawable = pm.getApplicationIcon(appInfo)
-                AppHistoryEntry(
+                RawHistoryEntry(
                     label = label,
                     icon = icon,
+                    timestamp = timestamp,
                     timeText = timeFormatter.format(timestamp)
                 )
             } catch (e: PackageManager.NameNotFoundException) {
@@ -338,8 +395,5 @@ class CheckPhoneHistoryActivity : AppCompatActivity() {
                 null
             }
         }
-
-        // Most recent app open at the top.
-        return entries.reversed()
     }
 }
