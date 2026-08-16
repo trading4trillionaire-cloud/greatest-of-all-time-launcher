@@ -12,12 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.goat.app.databinding.ActivityCallSafetyContentBinding
 import java.util.concurrent.Executors
 
-/**
- * "Calls - Safe or Not" content screen. Single-step guide (no progress dots,
- * unlike the WhatsApp guide) that shows the ##002# call-forwarding-off code
- * and opens the phone dialer with that code pre-filled when the user taps
- * the primary button.
- */
 class CallSafetyContentActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCallSafetyContentBinding
