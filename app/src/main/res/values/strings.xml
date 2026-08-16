@@ -14,6 +14,8 @@
 
     <string name="clean_storage_title">Clean Storage</string>
     <string name="clean_storage_size_calculating">Calculating…</string>
+    <string name="clean_storage_permission_needed">Tap to allow access</string>
+    <string name="clean_storage_permission_toast">Cache dekhne ke liye \"Usage Access\" ON karo, phir wapas aa jao</string>
     <string name="open_button_text">Open</string>
 
     <string name="watch_ad_title_line1"></string>
