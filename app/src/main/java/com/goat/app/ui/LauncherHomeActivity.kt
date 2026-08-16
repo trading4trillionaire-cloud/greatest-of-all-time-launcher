@@ -5,6 +5,8 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
+import android.app.AppOpsManager
+import android.app.usage.StorageStatsManager
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
@@ -15,9 +17,13 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.Process
+import android.os.storage.StorageManager
+import android.provider.Settings
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
@@ -102,10 +108,6 @@ class LauncherHomeActivity : AppCompatActivity() {
         private const val IMPRESSION_COOLDOWN_MS = 15_000L
 
         private const val CACHE_EXPIRY_MS = 45 * 60 * 1000L
-
-        // Rough fraction of each installed app's APK size used to estimate its cache footprint —
-        // apps don't expose real per-app cache size without a special system permission.
-        private const val CACHE_ESTIMATE_FACTOR = 0.12
 
         private fun clearAllCachedState() {
             cachedExpandPanelMethod = null
@@ -521,6 +523,10 @@ class LauncherHomeActivity : AppCompatActivity() {
 
     private fun setupCleanStorageCard() {
         binding.storageCleanCard.setOnClickListener {
+            if (!hasUsageAccessPermission()) {
+                requestUsageAccessPermission()
+                return@setOnClickListener
+            }
             val sizeLabel = binding.tvCleanStorageSize.text.toString()
             val intent = Intent(this, CleanStorageUnlockActivity::class.java)
             intent.putExtra(CleanStorageUnlockActivity.EXTRA_SIZE_LABEL, sizeLabel)
@@ -528,7 +534,44 @@ class LauncherHomeActivity : AppCompatActivity() {
         }
     }
 
+    // Real per-app cache size is only readable through "Usage Access" — a special permission
+    // Android grants from Settings (not a normal runtime permission dialog). Without it, apps
+    // can only see their own cache.
+    private fun hasUsageAccessPermission(): Boolean {
+        return try {
+            val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+            val mode = appOps.checkOpNoThrow(
+                AppOpsManager.OPSTR_GET_USAGE_STATS,
+                Process.myUid(),
+                packageName
+            )
+            mode == AppOpsManager.MODE_ALLOWED
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun requestUsageAccessPermission() {
+        Toast.makeText(this, getString(R.string.clean_storage_permission_toast), Toast.LENGTH_LONG).show()
+        try {
+            val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+            intent.data = Uri.parse("package:$packageName")
+            startActivity(intent)
+        } catch (e: Exception) {
+            try {
+                startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+            } catch (e2: Exception) {
+            }
+        }
+    }
+
     private fun refreshStorageCacheSize() {
+        if (!hasUsageAccessPermission()) {
+            cachedStorageSizeLabel = null
+            binding.tvCleanStorageSize.text = getString(R.string.clean_storage_permission_needed)
+            return
+        }
+
         val cached = cachedStorageSizeLabel
         if (cached != null) {
             binding.tvCleanStorageSize.text = cached
@@ -552,6 +595,9 @@ class LauncherHomeActivity : AppCompatActivity() {
     private fun computeTotalAppCacheLabel(): String {
         val totalBytes = try {
             val pm = packageManager
+            val storageStatsManager =
+                getSystemService(Context.STORAGE_SERVICE) as? StorageStatsManager
+
             val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
             val resolved: List<ResolveInfo> = try {
                 pm.queryIntentActivities(intent, 0)
@@ -566,14 +612,19 @@ class LauncherHomeActivity : AppCompatActivity() {
                 .distinct()
 
             var total = 0L
-            for (pkg in drawerPackageNames) {
-                try {
-                    val appInfo = pm.getApplicationInfo(pkg, 0)
-                    val apkFile = java.io.File(appInfo.sourceDir)
-                    if (apkFile.exists()) {
-                        total += (apkFile.length() * CACHE_ESTIMATE_FACTOR).toLong()
+            if (storageStatsManager != null) {
+                val userHandle = Process.myUserHandle()
+                for (pkg in drawerPackageNames) {
+                    try {
+                        val stats = storageStatsManager.queryStatsForPackage(
+                            StorageManager.UUID_DEFAULT,
+                            pkg,
+                            userHandle
+                        )
+                        total += stats.cacheBytes
+                    } catch (e: Exception) {
+                        // Permission missing / app uninstalled mid-scan / transient error — skip it.
                     }
-                } catch (e: Exception) {
                 }
             }
             total
