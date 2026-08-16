@@ -45,68 +45,28 @@
             android:letterSpacing="0.05" />
 
         <LinearLayout
-            android:id="@+id/whatsappCheckBlock"
+            android:id="@+id/featureCarouselBlock"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
-            android:paddingStart="32dp"
-            android:paddingEnd="32dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
             android:paddingBottom="40dp">
 
-            <ImageView
-                android:id="@+id/ivWhatsappCheck"
-                android:layout_width="168dp"
-                android:layout_height="168dp"
-                android:adjustViewBounds="true"
-                android:maxWidth="210dp"
-                android:maxHeight="210dp"
-                android:src="@drawable/ic_whatsapp"
-                android:contentDescription="@string/whatsapp_check_title_line1" />
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/vpFeatureCarousel"
+                android:layout_width="match_parent"
+                android:layout_height="272dp" />
 
-            <TextView
-                android:id="@+id/tvWhatsappCheckTitle"
+            <LinearLayout
+                android:id="@+id/featureCarouselDots"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:gravity="center"
-                android:text="@string/whatsapp_check_title_line1"
-                android:textColor="@color/home_button_text"
-                android:textSize="20sp"
-                android:fontFamily="sans-serif"
-                android:letterSpacing="0.02" />
-
-            <TextView
-                android:id="@+id/tvWhatsappCheckSubtitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:gravity="center"
-                android:text="@string/whatsapp_check_title_line2"
-                android:textColor="@color/home_button_text"
-                android:textSize="21sp"
-                android:textStyle="bold"
-                android:textAllCaps="true"
-                android:fontFamily="sans-serif"
-                android:letterSpacing="0.05" />
-
-            <TextView
-                android:id="@+id/btnCheckWhatsappNow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="22dp"
-                android:background="@drawable/bg_check_now_button"
-                android:text="@string/whatsapp_check_button_text"
-                android:textColor="@color/home_button_text"
-                android:textSize="18sp"
-                android:textAllCaps="false"
-                android:paddingStart="36dp"
-                android:paddingEnd="36dp"
-                android:paddingTop="14dp"
-                android:paddingBottom="14dp"
-                android:clickable="true"
-                android:focusable="true" />
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal"
+                android:gravity="center" />
 
         </LinearLayout>
 
