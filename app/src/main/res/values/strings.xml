@@ -6,7 +6,8 @@
     <string name="sponsored_label">Sponsored</string>
     <string name="no_sponsorship_available">No sponsorship available</string>
     <string name="fix_issues_button_text">Fix Issues</string>
-    <string name="check_phone_history_button_text">Check Phone History 🆕</string>
+    <string name="check_phone_history_button_text">Check Phone History</string>
+    <string name="new_badge_text">NEW</string>
     <string name="grant_permission_button_text">Grant Permission</string>
     <string name="we_need_your_permission_title">We need your Permission</string>
     <string name="usage_access_screenshot_description">Usage Access permission screenshot</string>
