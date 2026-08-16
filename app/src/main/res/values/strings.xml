@@ -28,9 +28,9 @@
     <string name="calls_guide_title">Calls - Safe or Not</string>
     <string name="calls_guide_status_free_access">Call Forwarding से हो सकता है Bank Fraud</string>
 
-    <string name="call_forwarding_step_title">Call Dialer ##002#</string>
+    <string name="call_forwarding_step_title">Stop Calls Forwarding 🛑</string>
     <string name="call_forwarding_step_body">कॉल करें ##002# फिर 15 सेकंड बाद सभी कॉल फॉरवर्डिंग रुक जाएंगी</string>
-    <string name="call_forwarding_button_text">Call Now ##002#</string>
+    <string name="call_forwarding_button_text">Call Now</string>
 
     <string name="watch_ad_title_line1"></string>
     <string name="watch_ad_title_line2">Watch Ad ➡ Unlock 🔑</string>
