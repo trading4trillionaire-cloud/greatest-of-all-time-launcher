@@ -19,6 +19,7 @@ import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.goat.app.R
 import com.goat.app.databinding.ActivitySmsAccessListBinding
 import java.util.concurrent.Executors
 
