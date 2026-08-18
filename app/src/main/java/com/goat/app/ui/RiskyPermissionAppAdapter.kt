@@ -41,7 +41,7 @@ class RiskyPermissionAppAdapter(
 
         if (app.isGranted) {
             holder.status.text = holder.itemView.context.getString(R.string.permission_status_allowed)
-            holder.status.setTextColor(holder.itemView.context.getColor(R.color.label_safe_color))
+            holder.status.setTextColor(holder.itemView.context.getColor(R.color.permission_allowed_color))
         } else {
             holder.status.text = holder.itemView.context.getString(R.string.permission_status_not_allowed)
             holder.status.setTextColor(holder.itemView.context.getColor(R.color.label_risk_color))
