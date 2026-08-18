@@ -131,6 +131,7 @@ class LauncherHomeActivity : AppCompatActivity() {
         setupFixIssueButton()
         setupCheckWhatsappButton()
         setupCheckCallButton()
+        setupCheckRiskyPermissionsButton()
         setupCheckPhoneHistoryButton()
         setupFeaturesNav()
         setupSwipeThroughForClickableCards()
@@ -588,6 +589,8 @@ class LauncherHomeActivity : AppCompatActivity() {
             binding.btnCheckWhatsappNow,
             binding.callGuideCard,
             binding.btnCheckCallNow,
+            binding.riskyPermissionsGuideCard,
+            binding.btnCheckRiskyPermissionsNow,
             binding.btnCheckPhoneHistory,
             binding.btnFeaturesLeft,
             binding.btnFeaturesRight
@@ -658,10 +661,19 @@ class LauncherHomeActivity : AppCompatActivity() {
         binding.callGuideCard.setOnClickListener(openCallGuide)
     }
 
+    private fun setupCheckRiskyPermissionsButton() {
+        val openRiskyPermissionsGuide = View.OnClickListener {
+            startActivity(Intent(this, RiskyPermissionsActivity::class.java))
+        }
+
+        binding.btnCheckRiskyPermissionsNow.setOnClickListener(openRiskyPermissionsGuide)
+        binding.riskyPermissionsGuideCard.setOnClickListener(openRiskyPermissionsGuide)
+    }
+
     private var currentFeatureCardIndex = 0
 
     private fun setupFeaturesNav() {
-        val featureCards = listOf(binding.whatsappGuideCard, binding.callGuideCard)
+        val featureCards = listOf(binding.whatsappGuideCard, binding.callGuideCard, binding.riskyPermissionsGuideCard)
 
         fun showCard(index: Int) {
             currentFeatureCardIndex = index
