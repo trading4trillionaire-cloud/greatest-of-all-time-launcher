@@ -1,5 +1,6 @@
 package com.goat.app.ui
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -8,10 +9,13 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -110,13 +114,55 @@ class SmsAccessListActivity : AppCompatActivity() {
     }
 
     private fun openAppSettings(packageName: String) {
-        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-        intent.data = Uri.parse("package:$packageName")
-        try {
-            startActivity(intent)
-        } catch (e: Exception) {
+        showGuidanceDialog {
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            intent.data = Uri.parse("package:$packageName")
+            try {
+                startActivity(intent)
+            } catch (e: Exception) {
 
+            }
         }
+    }
+
+    private fun showGuidanceDialog(onProceed: () -> Unit) {
+        val dialogView = LayoutInflater.from(this)
+            .inflate(R.layout.dialog_permission_guidance, null)
+        val btnClose = dialogView.findViewById<TextView>(R.id.btnGuidanceClose)
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        val countdownTimer = object : CountDownTimer(5000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                val secondsLeft = (millisUntilFinished / 1000) + 1
+                btnClose.text = getString(R.string.permission_guidance_close_countdown, secondsLeft)
+            }
+
+            override fun onFinish() {
+                btnClose.text = getString(R.string.permission_guidance_close)
+                btnClose.isEnabled = true
+                btnClose.alpha = 1.0f
+            }
+        }
+        countdownTimer.start()
+
+        btnClose.setOnClickListener {
+            if (btnClose.isEnabled) {
+                countdownTimer.cancel()
+                dialog.dismiss()
+                onProceed()
+            }
+        }
+
+        dialog.setOnDismissListener {
+            countdownTimer.cancel()
+        }
+
+        dialog.show()
     }
 
     private fun toFixedSizeDrawable(source: Drawable, targetSizePx: Int, reusableCanvas: Canvas): Drawable {
