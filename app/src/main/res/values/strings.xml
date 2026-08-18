@@ -32,8 +32,10 @@
 
     <string name="sms_access_permission_name">SMS Access</string>
     <string name="sms_access_permission_description">यह permission वाले apps आपके OTP/messages देख सकते हैं।</string>
-    <string name="permission_toggle_on">ON 🔘</string>
-    <string name="permission_toggle_off">OFF 🔴</string>
+    <string name="permission_toggle_on">⚙️ Settings</string>
+    <string name="permission_toggle_off">⚙️ Settings</string>
+    <string name="permission_status_allowed">• Allowed</string>
+    <string name="permission_status_not_allowed">• Not Allowed</string>
     <string name="no_apps_with_permission">कोई भी app मिला नहीं इस permission के साथ।</string>
 
     <string name="call_forwarding_step_title">Stop Calls Forwarding 🛑</string>
