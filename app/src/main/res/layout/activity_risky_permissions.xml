@@ -5,86 +5,81 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_home_gradient">
 
-    <!-- Fixed (non-scrollable) header describing the permission -->
-    <LinearLayout
-        android:id="@+id/permissionHeaderCard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:background="@drawable/bg_whatsapp_guide_card"
-        android:layout_marginTop="64dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:paddingStart="18dp"
-        android:paddingEnd="18dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp">
+    <!-- More permission items will be added below over time. -->
 
-        <TextView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:text="📩"
-            android:textSize="22sp"
-            android:gravity="center"
-            android:includeFontPadding="false" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingTop="72dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:id="@+id/permissionsListContainer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="14dp"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tvSmsAccessPermissionName"
+            <LinearLayout
+                android:id="@+id/btnSmsAccessPermission"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/sms_access_permission_name"
-                android:textColor="@color/guide_card_title_text"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:fontFamily="sans-serif" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_whatsapp_guide_card"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:clickable="true"
+                android:focusable="true">
 
-            <TextView
-                android:id="@+id/tvSmsAccessPermissionDescription"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="@string/sms_access_permission_description"
-                android:textColor="@color/guide_card_subtitle_text"
-                android:textSize="13sp"
-                android:lineSpacingMultiplier="1.1"
-                android:fontFamily="sans-serif" />
+                <TextView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:text="📩"
+                    android:textSize="22sp"
+                    android:gravity="center"
+                    android:includeFontPadding="false" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvSmsAccessPermissionName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/sms_access_permission_name"
+                        android:textColor="@color/guide_card_title_text"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:fontFamily="sans-serif" />
+
+                    <TextView
+                        android:id="@+id/tvSmsAccessPermissionDescription"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/sms_access_permission_description"
+                        android:textColor="@color/guide_card_subtitle_text"
+                        android:textSize="13sp"
+                        android:lineSpacingMultiplier="1.1"
+                        android:fontFamily="sans-serif" />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
 
     </LinearLayout>
-
-    <!-- Scrollable list of apps holding this permission, sits below the fixed header -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvPermissionApps"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="top"
-        android:layout_marginTop="152dp"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="24dp"
-        android:clipToPadding="false" />
-
-    <!-- Loading spinner while the app list is being scanned -->
-    <ProgressBar
-        android:id="@+id/permissionListLoader"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="60dp"
-        android:indeterminateTint="@color/home_button_text"
-        android:visibility="visible" />
 
     <ImageView
         android:id="@+id/btnBack"
