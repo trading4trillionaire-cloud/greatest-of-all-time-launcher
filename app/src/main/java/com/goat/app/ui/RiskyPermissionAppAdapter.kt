@@ -25,6 +25,7 @@ class RiskyPermissionAppAdapter(
         val icon: ImageView = view.findViewById(R.id.ivPermissionAppIcon)
         val label: TextView = view.findViewById(R.id.tvPermissionAppLabel)
         val toggle: TextView = view.findViewById(R.id.btnPermissionToggle)
+        val status: TextView = view.findViewById(R.id.tvPermissionAppStatus)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -39,12 +40,15 @@ class RiskyPermissionAppAdapter(
         holder.label.text = app.label
 
         if (app.isGranted) {
-            holder.toggle.text = holder.itemView.context.getString(R.string.permission_toggle_on)
-            holder.toggle.setTextColor(holder.itemView.context.getColor(R.color.label_safe_color))
+            holder.status.text = holder.itemView.context.getString(R.string.permission_status_allowed)
+            holder.status.setTextColor(holder.itemView.context.getColor(R.color.label_safe_color))
         } else {
-            holder.toggle.text = holder.itemView.context.getString(R.string.permission_toggle_off)
-            holder.toggle.setTextColor(holder.itemView.context.getColor(R.color.label_risk_color))
+            holder.status.text = holder.itemView.context.getString(R.string.permission_status_not_allowed)
+            holder.status.setTextColor(holder.itemView.context.getColor(R.color.label_risk_color))
         }
+
+        holder.toggle.text = holder.itemView.context.getString(R.string.permission_toggle_on)
+        holder.toggle.setTextColor(holder.itemView.context.getColor(R.color.guide_card_title_text))
 
         holder.toggle.setOnClickListener { onToggleClick(app) }
     }
