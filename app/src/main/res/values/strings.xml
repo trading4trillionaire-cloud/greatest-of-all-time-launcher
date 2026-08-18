@@ -18,12 +18,12 @@
     <string name="history_date_today">Today</string>
     <string name="history_date_yesterday">Yesterday</string>
 
-    <string name="whatsapp_guide_title">Whatsapp - Safe or Not</string>
+    <string name="whatsapp_guide_title">Whatsapp</string>
     <string name="whatsapp_guide_status_not_viewed">Not viewed yet</string>
     <string name="whatsapp_guide_status_free_access">क्या कोई अनजान आपका Whatsapp चला रहा है?</string>
     <string name="whatsapp_guide_button_view">Check Now</string>
 
-    <string name="calls_guide_title">Calls - Safe or Not</string>
+    <string name="calls_guide_title">Call Forwarding</string>
     <string name="calls_guide_status_free_access">Call Forwarding से हो सकता है Bank Fraud</string>
 
     <string name="call_forwarding_step_title">Stop Calls Forwarding 🛑</string>
