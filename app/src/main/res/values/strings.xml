@@ -36,7 +36,7 @@
     <string name="permission_toggle_off">⚙️ Settings</string>
     <string name="permission_status_allowed">• Allowed</string>
     <string name="permission_status_not_allowed">• Not Allowed</string>
-    <string name="permission_guidance_close_countdown">Close (%d)</string>
+    <string name="permission_guidance_close_countdown">Read 👆 (%d)</string>
     <string name="permission_guidance_close">OK</string>
     <string name="no_apps_with_permission">कोई भी app मिला नहीं इस permission के साथ।</string>
 
