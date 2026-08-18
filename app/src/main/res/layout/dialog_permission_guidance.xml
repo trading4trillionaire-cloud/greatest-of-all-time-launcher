@@ -58,7 +58,7 @@
         android:layout_marginTop="22dp"
         android:background="@drawable/bg_view_guide_button"
         android:text="Close (5)"
-        android:textColor="@color/home_button_text"
+        android:textColor="@color/guide_card_button_text"
         android:textSize="14sp"
         android:textStyle="bold"
         android:textAllCaps="false"
