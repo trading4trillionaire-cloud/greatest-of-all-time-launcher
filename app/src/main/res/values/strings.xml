@@ -26,6 +26,10 @@
     <string name="calls_guide_title">Call Forwarding</string>
     <string name="calls_guide_status_free_access">Call Forwarding से हो सकता है Bank Fraud</string>
 
+    <string name="risky_permissions_guide_title">Risky Permissions in Apps</string>
+    <string name="risky_permissions_guide_status">कौन सा app क्या क्या कर सकता है?</string>
+    <string name="risky_permissions_guide_button_view">Check Now</string>
+
     <string name="call_forwarding_step_title">Stop Calls Forwarding 🛑</string>
     <string name="call_forwarding_step_body">कॉल करें ##002# फिर 15 सेकंड बाद सभी कॉल फॉरवर्डिंग रुक जाएंगी</string>
     <string name="call_forwarding_button_text">Call Now</string>
