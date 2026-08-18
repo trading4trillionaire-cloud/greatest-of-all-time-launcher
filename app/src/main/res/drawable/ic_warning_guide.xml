@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="40dp"
+    android:height="40dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+
+    <!-- Red rounded square background -->
+    <path
+        android:fillColor="@color/label_risk_color"
+        android:pathData="M0,24 C0,10.75 10.75,0 24,0 L72,0 C85.25,0 96,10.75 96,24 L96,72 C96,85.25 85.25,96 72,96 L24,96 C10.75,96 0,85.25 0,72 Z" />
+
+    <!-- White triangular warning glyph, centered -->
+    <group
+        android:translateX="16"
+        android:translateY="16"
+        android:scaleX="2.6667"
+        android:scaleY="2.6667">
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M12,3 L23,21 L1,21 Z M12,9 C11.45,9 11,9.45 11,10 L11,14 C11,14.55 11.45,15 12,15 C12.55,15 13,14.55 13,14 L13,10 C13,9.45 12.55,9 12,9 Z M12,16.25 C11.38,16.25 10.88,16.75 10.88,17.38 C10.88,18 11.38,18.5 12,18.5 C12.62,18.5 13.13,18 13.13,17.38 C13.13,16.75 12.62,16.25 12,16.25 Z" />
+    </group>
+</vector>
