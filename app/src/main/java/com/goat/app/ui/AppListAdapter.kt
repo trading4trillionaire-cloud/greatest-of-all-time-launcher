@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.goat.app.R
 
@@ -36,7 +37,7 @@ sealed class DrawerListItem {
 }
 
 class AppListAdapter(
-    private val items: List<DrawerListItem>,
+    private var items: List<DrawerListItem>,
     private val sizing: DrawerIconSizing,
     private val onAppClick: (AppEntry) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -109,6 +110,44 @@ class AppListAdapter(
     }
 
     override fun getItemCount(): Int = items.size
+
+    /**
+     * Replaces the current list with [newItems] using DiffUtil, so only the rows that
+     * actually changed (added / removed / moved) get updated in the RecyclerView.
+     * Unlike swapping the whole adapter, this avoids the "icons disappear and redraw"
+     * flicker when the drawer refreshes Recommended/Recent apps on open.
+     */
+    fun updateItems(newItems: List<DrawerListItem>) {
+        val oldItems = items
+        val diffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun getOldListSize(): Int = oldItems.size
+            override fun getNewListSize(): Int = newItems.size
+
+            private fun idOf(item: DrawerListItem): Long = when (item) {
+                is DrawerListItem.Header -> item.stableId
+                is DrawerListItem.AppItem -> item.app.stableId
+            }
+
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return idOf(oldItems[oldItemPosition]) == idOf(newItems[newItemPosition])
+            }
+
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                val oldItem = oldItems[oldItemPosition]
+                val newItem = newItems[newItemPosition]
+                return when {
+                    oldItem is DrawerListItem.Header && newItem is DrawerListItem.Header ->
+                        oldItem.title == newItem.title
+                    oldItem is DrawerListItem.AppItem && newItem is DrawerListItem.AppItem ->
+                        oldItem.app.packageName == newItem.app.packageName &&
+                            oldItem.app.label == newItem.app.label
+                    else -> false
+                }
+            }
+        })
+        items = newItems
+        diffResult.dispatchUpdatesTo(this)
+    }
 
     override fun getItemId(position: Int): Long {
         return when (val item = items[position]) {
