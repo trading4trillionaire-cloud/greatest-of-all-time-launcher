@@ -77,6 +77,63 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/btnAccessibilityPermission"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_whatsapp_guide_card"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:text="♿"
+                    android:textSize="22sp"
+                    android:gravity="center"
+                    android:includeFontPadding="false" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvAccessibilityPermissionName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/accessibility_permission_name"
+                        android:textColor="@color/guide_card_title_text"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:fontFamily="sans-serif" />
+
+                    <TextView
+                        android:id="@+id/tvAccessibilityPermissionDescription"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/accessibility_permission_description"
+                        android:textColor="@color/guide_card_subtitle_text"
+                        android:textSize="13sp"
+                        android:lineSpacingMultiplier="1.1"
+                        android:fontFamily="sans-serif" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
         </LinearLayout>
 
     </LinearLayout>
