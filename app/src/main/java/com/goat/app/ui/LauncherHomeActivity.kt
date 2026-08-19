@@ -804,6 +804,20 @@ class LauncherHomeActivity : AppCompatActivity() {
     }
 
     /**
+     * Rebuilds just the Recommended/Recent/All-apps sections from the currently cached
+     * app list and the latest usage stats, and swaps the adapter in. Cheap (no package
+     * manager re-query), so this is safe to call every time the drawer is opened, which
+     * keeps Recommended/Recent apps in sync with usage immediately -- without requiring
+     * the user to hit "Fix Issues" to see updated counts.
+     */
+    private fun refreshDrawerUsageSections() {
+        val apps = cachedApps ?: return
+        val displayItems = buildDrawerListItems(apps)
+        binding.rvApps.adapter =
+            AppListAdapter(displayItems, drawerIconSizing) { app -> launchApp(app) }
+    }
+
+    /**
      * Builds the sectioned app-drawer list: Recommended apps (most opened, capped at
      * RECOMMENDED_MAX_ROWS rows) -> Recent Apps (recently opened apps not already shown
      * under Recommended, capped at RECENT_MAX_ROWS rows) -> All Apps (full alphabetical
@@ -893,6 +907,8 @@ class LauncherHomeActivity : AppCompatActivity() {
     }
 
     private fun onDrawerOpened() {
+        refreshDrawerUsageSections()
+
         val now = System.currentTimeMillis()
 
         if (now - lastImpressionTime < IMPRESSION_COOLDOWN_MS) {
