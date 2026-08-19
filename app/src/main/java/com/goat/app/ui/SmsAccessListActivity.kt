@@ -34,6 +34,20 @@ class SmsAccessListActivity : AppCompatActivity() {
         android.Manifest.permission.RECEIVE_SMS
     )
 
+    private var currentEntries: MutableList<PermissionAppEntry> = mutableListOf()
+    private var adapter: RiskyPermissionAppAdapter? = null
+    private var isPolling = false
+    private val pollIntervalMs = 1500L
+
+    private val pollRunnable = object : Runnable {
+        override fun run() {
+            refreshPermissionStatuses()
+            if (isPolling) {
+                mainHandler.postDelayed(this, pollIntervalMs)
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySmsAccessListBinding.inflate(layoutInflater)
@@ -52,9 +66,66 @@ class SmsAccessListActivity : AppCompatActivity() {
         loadSmsPermissionAppsAsync()
     }
 
+    override fun onResume() {
+        super.onResume()
+        startPolling()
+    }
+
+    override fun onPause() {
+        stopPolling()
+        super.onPause()
+    }
+
     override fun onDestroy() {
+        stopPolling()
         loadExecutor.shutdown()
         super.onDestroy()
+    }
+
+    private fun startPolling() {
+        if (isPolling) return
+        isPolling = true
+        // Skip the immediate first tick right after the initial load already ran;
+        // the loop schedules itself, so just kick it off with the standard delay.
+        mainHandler.postDelayed(pollRunnable, pollIntervalMs)
+    }
+
+    private fun stopPolling() {
+        isPolling = false
+        mainHandler.removeCallbacks(pollRunnable)
+    }
+
+    private fun refreshPermissionStatuses() {
+        // Only poll once we actually have a loaded list on screen.
+        if (currentEntries.isEmpty()) return
+        if (isFinishing || isDestroyed) return
+
+        loadExecutor.execute {
+            val pm = packageManager
+            val updates = mutableListOf<Pair<Int, Boolean>>()
+
+            currentEntries.forEachIndexed { index, entry ->
+                val isGranted = smsPermissions.any { perm ->
+                    pm.checkPermission(perm, entry.packageName) == PackageManager.PERMISSION_GRANTED
+                }
+                if (isGranted != entry.isGranted) {
+                    updates.add(index to isGranted)
+                }
+            }
+
+            if (updates.isEmpty()) return@execute
+
+            mainHandler.post {
+                if (isFinishing || isDestroyed) return@post
+                updates.forEach { (index, isGranted) ->
+                    if (index < currentEntries.size) {
+                        val entry = currentEntries[index]
+                        currentEntries[index] = entry.copy(isGranted = isGranted)
+                        adapter?.notifyItemChanged(index)
+                    }
+                }
+            }
+        }
     }
 
     private fun loadSmsPermissionAppsAsync() {
@@ -107,9 +178,13 @@ class SmsAccessListActivity : AppCompatActivity() {
 
                 binding.permissionListLoader.visibility = View.GONE
                 binding.rvPermissionApps.visibility = View.VISIBLE
-                binding.rvPermissionApps.adapter = RiskyPermissionAppAdapter(entries) { app ->
+
+                currentEntries = entries.toMutableList()
+                val newAdapter = RiskyPermissionAppAdapter(currentEntries) { app ->
                     openAppSettings(app.packageName)
                 }
+                adapter = newAdapter
+                binding.rvPermissionApps.adapter = newAdapter
             }
         }
     }
