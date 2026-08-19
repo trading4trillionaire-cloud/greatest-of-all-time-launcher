@@ -27,6 +27,10 @@ class RiskyPermissionsActivity : AppCompatActivity() {
             startActivity(Intent(this, SmsAccessListActivity::class.java))
         }
 
+        binding.btnAccessibilityPermission.setOnClickListener {
+            startActivity(Intent(this, AccessibilityAccessListActivity::class.java))
+        }
+
         // More permission buttons will be wired up here later.
     }
 }
