@@ -2,6 +2,9 @@
     <string name="app_name">Goat</string>
     <string name="setup">Setup</string>
     <string name="all_apps_hint">Show Apps</string>
+    <string name="drawer_section_recommended">Recommended apps</string>
+    <string name="drawer_section_recent">Recent Apps</string>
+    <string name="drawer_section_all_apps">All Apps</string>
     <string name="features_nav_label">Features</string>
     <string name="sponsored_label">Sponsored</string>
     <string name="no_sponsorship_available">No sponsorship available</string>
