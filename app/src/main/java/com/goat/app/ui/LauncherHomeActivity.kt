@@ -813,8 +813,16 @@ class LauncherHomeActivity : AppCompatActivity() {
     private fun refreshDrawerUsageSections() {
         val apps = cachedApps ?: return
         val displayItems = buildDrawerListItems(apps)
-        binding.rvApps.adapter =
-            AppListAdapter(displayItems, drawerIconSizing) { app -> launchApp(app) }
+
+        val existingAdapter = binding.rvApps.adapter as? AppListAdapter
+        if (existingAdapter != null) {
+            // Diff against the existing list instead of swapping the adapter, so only
+            // rows that actually changed get redrawn -- no more flicker on drawer open.
+            existingAdapter.updateItems(displayItems)
+        } else {
+            binding.rvApps.adapter =
+                AppListAdapter(displayItems, drawerIconSizing) { app -> launchApp(app) }
+        }
     }
 
     /**
