@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.goat.app.R
+import com.goat.app.data.AppUsageStore
 import com.goat.app.databinding.ActivityLauncherHomeBinding
 import java.util.concurrent.Executors
 import com.google.android.gms.ads.AdListener
@@ -83,6 +84,12 @@ class LauncherHomeActivity : AppCompatActivity() {
         private const val MIN_COLUMN_COUNT = 4
         private const val MAX_COLUMN_COUNT = 5
         private const val VISIBLE_ROW_COUNT = 5
+
+        // Max number of grid rows to show in each app-drawer section. Change these
+        // freely to tweak how many apps show up under each heading — the actual item
+        // count per section is (current column/span count * these row limits).
+        private const val RECOMMENDED_MAX_ROWS = 3
+        private const val RECENT_MAX_ROWS = 2
         private const val OPEN_PROGRESS_THRESHOLD = 0.08f
         private const val CLOSE_PROGRESS_THRESHOLD = 0.08f
         private const val HOME_MIN_ALPHA = 0.1f
@@ -139,7 +146,8 @@ class LauncherHomeActivity : AppCompatActivity() {
 
         val cached = cachedApps
         if (cached != null) {
-            binding.rvApps.adapter = AppListAdapter(cached, drawerIconSizing) { app -> launchApp(app) }
+            binding.rvApps.adapter =
+                AppListAdapter(buildDrawerListItems(cached), drawerIconSizing) { app -> launchApp(app) }
         } else {
             loadAppsAsync()
         }
@@ -474,11 +482,21 @@ class LauncherHomeActivity : AppCompatActivity() {
 
             val position = parent.getChildAdapterPosition(view)
             val itemCount = parent.adapter?.itemCount ?: 0
-            val spanCount = (parent.layoutManager as? GridLayoutManager)?.spanCount ?: 1
-            val lastRowItemCount = itemCount % spanCount
-            val lastRowStartPosition = if (lastRowItemCount == 0) itemCount - spanCount else itemCount - lastRowItemCount
-            val isLastRow = position != RecyclerView.NO_POSITION && position >= lastRowStartPosition
-            outRect.bottom = if (isLastRow) 0 else rowSpacingPx
+            val adapter = parent.adapter as? AppListAdapter
+
+            if (position == RecyclerView.NO_POSITION || adapter == null) {
+                outRect.bottom = 0
+                return
+            }
+
+            // Only app rows get spacing; headers carry their own margins, and we never
+            // want a gap right before the next section's header or after the last item.
+            val isApp = adapter.getItemViewType(position) == AppListAdapter.VIEW_TYPE_APP
+            val isLastItem = position == itemCount - 1
+            val nextIsHeader = !isLastItem &&
+                adapter.getItemViewType(position + 1) == AppListAdapter.VIEW_TYPE_HEADER
+
+            outRect.bottom = if (isApp && !isLastItem && !nextIsHeader) rowSpacingPx else 0
         }
     }
 
@@ -488,6 +506,16 @@ class LauncherHomeActivity : AppCompatActivity() {
         val gridLayoutManager = GridLayoutManager(this, spanCount).apply {
             isItemPrefetchEnabled = true
             initialPrefetchItemCount = spanCount * 2
+            spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    val adapter = binding.rvApps.adapter as? AppListAdapter ?: return 1
+                    return if (adapter.getItemViewType(position) == AppListAdapter.VIEW_TYPE_HEADER) {
+                        spanCount
+                    } else {
+                        1
+                    }
+                }
+            }
         }
         binding.rvApps.layoutManager = gridLayoutManager
         binding.rvApps.overScrollMode = View.OVER_SCROLL_NEVER
@@ -511,7 +539,18 @@ class LauncherHomeActivity : AppCompatActivity() {
             override fun onGlobalLayout() {
                 val rv = binding.rvApps
                 if (rv.childCount > 0 && rv.height > 0) {
-                    val naturalRowHeightPx = rv.getChildAt(0).height
+                    var naturalRowHeightPx = 0
+                    for (i in 0 until rv.childCount) {
+                        val child = rv.getChildAt(i)
+                        val pos = rv.getChildAdapterPosition(child)
+                        val adapter = rv.adapter as? AppListAdapter
+                        if (pos != RecyclerView.NO_POSITION &&
+                            adapter?.getItemViewType(pos) == AppListAdapter.VIEW_TYPE_APP
+                        ) {
+                            naturalRowHeightPx = child.height
+                            break
+                        }
+                    }
                     if (naturalRowHeightPx > 0) {
                         val targetRowHeightPx = rv.height / VISIBLE_ROW_COUNT
                         val newSpacing = maxOf(0, targetRowHeightPx - naturalRowHeightPx)
@@ -706,6 +745,8 @@ class LauncherHomeActivity : AppCompatActivity() {
         val allPrefsDir = java.io.File(applicationInfo.dataDir, "shared_prefs")
         allPrefsDir.listFiles()?.forEach { prefFile ->
             val prefName = prefFile.name.removeSuffix(".xml")
+            // Recommended/Recent app-drawer usage data must survive "Fix Issues".
+            if (prefName == AppUsageStore.PREFS_FILE_NAME) return@forEach
             getSharedPreferences(prefName, Context.MODE_PRIVATE).edit().clear().commit()
         }
 
@@ -751,12 +792,69 @@ class LauncherHomeActivity : AppCompatActivity() {
 
             cachedApps = apps
 
+            val displayItems = buildDrawerListItems(apps)
+
             Handler(Looper.getMainLooper()).post {
                 if (!isFinishing) {
-                    binding.rvApps.adapter = AppListAdapter(apps, drawerIconSizing) { app -> launchApp(app) }
+                    binding.rvApps.adapter =
+                        AppListAdapter(displayItems, drawerIconSizing) { app -> launchApp(app) }
                 }
             }
         }
+    }
+
+    /**
+     * Builds the sectioned app-drawer list: Recommended apps (most opened, capped at
+     * RECOMMENDED_MAX_ROWS rows) -> Recent Apps (recently opened apps not already shown
+     * under Recommended, capped at RECENT_MAX_ROWS rows) -> All Apps (full alphabetical
+     * list, unlimited, same as before). Apps that don't fit within a section's row limit
+     * are simply dropped from that section, never overflowed.
+     *
+     * Usage data (open counts / last-opened timestamps) comes from AppUsageStore, which
+     * is persisted separately from other app prefs so it survives the "Fix Issues" reset.
+     */
+    private fun buildDrawerListItems(allApps: List<AppEntry>): List<DrawerListItem> {
+        val spanCount = calculateSpanCount()
+
+        val openCounts = AppUsageStore.getOpenCounts(this)
+        val lastOpened = AppUsageStore.getLastOpenedTimestamps(this)
+        val appsByPackage = allApps.associateBy { it.packageName }
+
+        val recommendedLimit = spanCount * RECOMMENDED_MAX_ROWS
+        val recommended = openCounts.entries
+            .filter { it.value > 0 }
+            .sortedWith(
+                compareByDescending<Map.Entry<String, Int>> { it.value }
+                    .thenBy { appsByPackage[it.key]?.label?.lowercase() ?: "" }
+            )
+            .mapNotNull { appsByPackage[it.key] }
+            .take(recommendedLimit)
+
+        val recommendedPackages = recommended.map { it.packageName }.toSet()
+
+        val recentLimit = spanCount * RECENT_MAX_ROWS
+        val recent = lastOpened.entries
+            .filter { it.key !in recommendedPackages }
+            .sortedByDescending { it.value }
+            .mapNotNull { appsByPackage[it.key] }
+            .take(recentLimit)
+
+        val items = mutableListOf<DrawerListItem>()
+
+        if (recommended.isNotEmpty()) {
+            items += DrawerListItem.Header(getString(R.string.drawer_section_recommended))
+            items += recommended.map { DrawerListItem.AppItem(it) }
+        }
+
+        if (recent.isNotEmpty()) {
+            items += DrawerListItem.Header(getString(R.string.drawer_section_recent))
+            items += recent.map { DrawerListItem.AppItem(it) }
+        }
+
+        items += DrawerListItem.Header(getString(R.string.drawer_section_all_apps))
+        items += allApps.map { DrawerListItem.AppItem(it) }
+
+        return items
     }
 
     private fun toFixedSizeDrawable(source: Drawable, targetSizePx: Int, reusableCanvas: Canvas): Drawable {
@@ -787,6 +885,7 @@ class LauncherHomeActivity : AppCompatActivity() {
         }
         try {
             startActivity(launchIntent)
+            AppUsageStore.recordAppOpened(this, app.packageName)
             closeDrawer()
         } catch (e: Exception) {
             Toast.makeText(this, "${app.label} nahi khul paya", Toast.LENGTH_SHORT).show()
