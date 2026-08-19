@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_home_gradient">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingTop="88dp"
+        android:paddingBottom="24dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp">
+
+        <!-- Instruction caption card: what to do on this step, in plain words -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_whatsapp_guide_card"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp">
+
+            <TextView
+                android:id="@+id/tvStepEyebrow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/guide_step_of_format"
+                android:textColor="@color/guide_step_eyebrow"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.08"
+                android:fontFamily="sans-serif" />
+
+            <TextView
+                android:id="@+id/tvStepTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/how_to_fix_title"
+                android:textColor="@color/guide_card_title_text"
+                android:textSize="19sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif" />
+
+            <TextView
+                android:id="@+id/tvStepBody"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/guide_card_subtitle_text"
+                android:textSize="14sp"
+                android:lineSpacingMultiplier="1.15"
+                android:fontFamily="sans-serif" />
+
+        </LinearLayout>
+
+        <!-- Screenshot area: shown inside a phone-shaped frame so it reads as a demo, not a real live screen -->
+        <FrameLayout
+            android:id="@+id/imageContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="18dp">
+
+            <FrameLayout
+                android:id="@+id/singleMockupFrame"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_phone_mockup_frame"
+                android:padding="12dp">
+
+                <ImageView
+                    android:id="@+id/ivStepImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="@null" />
+
+                <View
+                    android:layout_width="44dp"
+                    android:layout_height="5dp"
+                    android:layout_gravity="top|center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/bg_phone_notch" />
+
+            </FrameLayout>
+
+            <LinearLayout
+                android:id="@+id/compareContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal|top"
+                    android:paddingEnd="7dp">
+
+                    <TextView
+                        android:id="@+id/tvSafeLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:background="@drawable/bg_label_capsule"
+                        android:text="@string/label_safe"
+                        android:textColor="@color/label_safe_color"
+                        android:textStyle="bold"
+                        android:textSize="11sp"
+                        android:letterSpacing="0.02"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_phone_mockup_frame_small"
+                        android:padding="8dp">
+
+                        <ImageView
+                            android:id="@+id/ivSafeImage"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:adjustViewBounds="true"
+                            android:scaleType="fitCenter"
+                            android:contentDescription="@null" />
+
+                        <View
+                            android:layout_width="30dp"
+                            android:layout_height="4dp"
+                            android:layout_gravity="top|center_horizontal"
+                            android:layout_marginTop="3dp"
+                            android:background="@drawable/bg_phone_notch" />
+
+                    </FrameLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal|top"
+                    android:paddingStart="7dp">
+
+                    <TextView
+                        android:id="@+id/tvRiskLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:background="@drawable/bg_label_capsule"
+                        android:text="@string/label_risk"
+                        android:textColor="@color/label_risk_color"
+                        android:textStyle="bold"
+                        android:textSize="11sp"
+                        android:letterSpacing="0.02"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_phone_mockup_frame_small"
+                        android:padding="8dp">
+
+                        <ImageView
+                            android:id="@+id/ivRiskImage"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:adjustViewBounds="true"
+                            android:scaleType="fitCenter"
+                            android:contentDescription="@null" />
+
+                        <View
+                            android:layout_width="30dp"
+                            android:layout_height="4dp"
+                            android:layout_gravity="top|center_horizontal"
+                            android:layout_marginTop="3dp"
+                            android:background="@drawable/bg_phone_notch" />
+
+                    </FrameLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tvCompletedLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="14dp"
+            android:gravity="center"
+            android:text="@string/completed_label"
+            android:textColor="@color/label_safe_color"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/btnPrimaryAction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_primary_action_button"
+            android:text="@string/btn_next_step"
+            android:textColor="@color/text_on_primary"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            android:gravity="center"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:elevation="4dp" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="top|start"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="14dp"
+        android:padding="9dp"
+        android:background="@drawable/bg_fix_issue_button"
+        android:src="@drawable/ic_back_arrow"
+        android:contentDescription="@null"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="12dp" />
+
+    <!-- Step progress dots, aligned with the back button -->
+    <LinearLayout
+        android:id="@+id/progressDots"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="28dp"
+        android:orientation="horizontal"
+        android:elevation="12dp">
+
+        <View
+            android:id="@+id/dot0"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_progress_dot_active" />
+
+        <View
+            android:id="@+id/dot1"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_progress_dot_inactive" />
+
+        <View
+            android:id="@+id/dot2"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_progress_dot_inactive" />
+
+        <View
+            android:id="@+id/dot3"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_progress_dot_inactive" />
+
+        <View
+            android:id="@+id/dot4"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_progress_dot_inactive" />
+
+    </LinearLayout>
+
+</FrameLayout>
