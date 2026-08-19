@@ -747,13 +747,21 @@ class LauncherHomeActivity : AppCompatActivity() {
                         icon = toFixedSizeDrawable(it.loadIcon(pm), iconSizePx, reusableCanvas)
                     )
                 }
-                .sortedBy { it.label.lowercase() }
 
-            cachedApps = apps
+            // Usage-based order: apps opened more (and more recently) float to the top.
+            // Apps with no usage yet (score 0) keep a stable alphabetical order among
+            // themselves so the drawer never looks random for untouched apps.
+            val scores = AppUsageStore.getAllScores(this@LauncherHomeActivity)
+            val sortedApps = apps.sortedWith(
+                compareByDescending<AppEntry> { scores[it.packageName] ?: 0f }
+                    .thenBy { it.label.lowercase() }
+            )
+
+            cachedApps = sortedApps
 
             Handler(Looper.getMainLooper()).post {
                 if (!isFinishing) {
-                    binding.rvApps.adapter = AppListAdapter(apps, drawerIconSizing) { app -> launchApp(app) }
+                    binding.rvApps.adapter = AppListAdapter(sortedApps, drawerIconSizing) { app -> launchApp(app) }
                 }
             }
         }
@@ -787,6 +795,10 @@ class LauncherHomeActivity : AppCompatActivity() {
         }
         try {
             startActivity(launchIntent)
+            AppUsageStore.recordAppOpened(this, app.packageName)
+            // Drop the cached order so the next drawer open reflects this usage
+            // immediately instead of waiting for the normal cache expiry.
+            cachedApps = null
             closeDrawer()
         } catch (e: Exception) {
             Toast.makeText(this, "${app.label} nahi khul paya", Toast.LENGTH_SHORT).show()
