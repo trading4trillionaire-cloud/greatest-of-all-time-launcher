@@ -24,11 +24,27 @@ data class DrawerIconSizing(
     val textSizeSp: Float
 )
 
+/**
+ * A single row in the app-drawer RecyclerView: either a section header
+ * ("Recommended apps" / "Recent Apps" / "All Apps") or an app icon.
+ */
+sealed class DrawerListItem {
+    data class Header(val title: String) : DrawerListItem() {
+        val stableId: Long = ("header_" + title).hashCode().toLong()
+    }
+    data class AppItem(val app: AppEntry) : DrawerListItem()
+}
+
 class AppListAdapter(
-    private val apps: List<AppEntry>,
+    private val items: List<DrawerListItem>,
     private val sizing: DrawerIconSizing,
     private val onAppClick: (AppEntry) -> Unit
-) : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    companion object {
+        const val VIEW_TYPE_HEADER = 0
+        const val VIEW_TYPE_APP = 1
+    }
 
     private var lastAnimatedPosition = -1
 
@@ -36,42 +52,69 @@ class AppListAdapter(
         setHasStableIds(true)
     }
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class AppViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val icon: ImageView = view.findViewById(R.id.ivIcon)
         val label: TextView = view.findViewById(R.id.tvLabel)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_app, parent, false)
-        val holder = ViewHolder(view)
-
-        val iconParams = holder.icon.layoutParams
-        iconParams.width = sizing.iconSizePx
-        iconParams.height = sizing.iconSizePx
-        holder.icon.layoutParams = iconParams
-        holder.label.textSize = sizing.textSizeSp
-        return holder
+    class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val title: TextView = view.findViewById(R.id.tvSectionTitle)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val app = apps[position]
-        holder.icon.setImageDrawable(app.icon)
-        holder.label.text = app.label
-        holder.itemView.setOnClickListener { onAppClick(app) }
-        animateEntranceIfNeeded(holder.itemView, position)
+    override fun getItemViewType(position: Int): Int {
+        return when (items[position]) {
+            is DrawerListItem.Header -> VIEW_TYPE_HEADER
+            is DrawerListItem.AppItem -> VIEW_TYPE_APP
+        }
     }
 
-    override fun onViewRecycled(holder: ViewHolder) {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return if (viewType == VIEW_TYPE_HEADER) {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_drawer_header, parent, false)
+            HeaderViewHolder(view)
+        } else {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_app, parent, false)
+            val holder = AppViewHolder(view)
 
+            val iconParams = holder.icon.layoutParams
+            iconParams.width = sizing.iconSizePx
+            iconParams.height = sizing.iconSizePx
+            holder.icon.layoutParams = iconParams
+            holder.label.textSize = sizing.textSizeSp
+            holder
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (val item = items[position]) {
+            is DrawerListItem.Header -> {
+                (holder as HeaderViewHolder).title.text = item.title
+            }
+            is DrawerListItem.AppItem -> {
+                val appHolder = holder as AppViewHolder
+                val app = item.app
+                appHolder.icon.setImageDrawable(app.icon)
+                appHolder.label.text = app.label
+                appHolder.itemView.setOnClickListener { onAppClick(app) }
+                animateEntranceIfNeeded(appHolder.itemView, position)
+            }
+        }
+    }
+
+    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
         holder.itemView.animate().cancel()
         holder.itemView.alpha = 1f
         super.onViewRecycled(holder)
     }
 
-    override fun getItemCount(): Int = apps.size
+    override fun getItemCount(): Int = items.size
 
     override fun getItemId(position: Int): Long {
-        return apps[position].stableId
+        return when (val item = items[position]) {
+            is DrawerListItem.Header -> item.stableId
+            is DrawerListItem.AppItem -> item.app.stableId
+        }
     }
 
     private fun animateEntranceIfNeeded(itemView: View, position: Int) {
