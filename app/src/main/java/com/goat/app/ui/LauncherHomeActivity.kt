@@ -58,8 +58,8 @@ class LauncherHomeActivity : AppCompatActivity() {
     private var dragStartRawY = 0f
 
     private val appLoadExecutor = Executors.newSingleThreadExecutor()
-    private val shimmerHideHandler = Handler(Looper.getMainLooper())
-    private var pendingShimmerHide: Runnable? = null
+    private val revealHandler = Handler(Looper.getMainLooper())
+    private var pendingReveal: Runnable? = null
 
     private var packageChangeReceiver: BroadcastReceiver? = null
 
@@ -92,8 +92,7 @@ class LauncherHomeActivity : AppCompatActivity() {
         // count per section is (current column/span count * these row limits).
         private const val RECOMMENDED_MAX_ROWS = 3
         private const val RECENT_MAX_ROWS = 2
-        private const val SHIMMER_MIN_VISIBLE_MS = 320L
-        private const val SHIMMER_FADE_OUT_MS = 150L
+        private const val RECOMMENDED_REVEAL_DELAY_MS = 150L
         private const val OPEN_PROGRESS_THRESHOLD = 0.08f
         private const val CLOSE_PROGRESS_THRESHOLD = 0.08f
         private const val HOME_MIN_ALPHA = 0.1f
@@ -199,10 +198,7 @@ class LauncherHomeActivity : AppCompatActivity() {
         unregisterChargingReceiver()
         binding.chargingRing.pauseGlowAnimation()
 
-        pendingShimmerHide?.let { shimmerHideHandler.removeCallbacks(it) }
-        binding.drawerShimmerOverlay.animate().cancel()
-        binding.drawerShimmerOverlay.alpha = 1f
-        binding.drawerShimmerOverlay.stopShimmer()
+        pendingReveal?.let { revealHandler.removeCallbacks(it) }
 
         if (currentProgress > 0f && currentProgress < 1f) {
             snapAnimator?.cancel()
@@ -307,7 +303,7 @@ class LauncherHomeActivity : AppCompatActivity() {
     override fun onDestroy() {
         hintAnimator?.cancel()
         snapAnimator?.cancel()
-        pendingShimmerHide?.let { shimmerHideHandler.removeCallbacks(it) }
+        pendingReveal?.let { revealHandler.removeCallbacks(it) }
         packageChangeReceiver?.let { unregisterReceiver(it) }
         packageChangeReceiver = null
         appLoadExecutor.shutdown()
@@ -818,73 +814,44 @@ class LauncherHomeActivity : AppCompatActivity() {
     }
 
     /**
-     * Shows the shimmer skeleton over the drawer list, refreshes the Recommended/Recent
-     * sections underneath (hidden from view), then waits a short minimum duration before
-     * revealing the updated list. This exists specifically to prevent an accidental tap:
-     * without it, the list can reorder (e.g. Recommended apps swapping order) at the exact
-     * moment the drawer becomes touchable, so a tap aimed at one app can land on another
-     * that has just taken its place. The shimmer blocks touches for that whole window.
-     *
-     * Only the Recommended + Recent sections are covered -- "All Apps" below is left
-     * alone -- and the placeholder is sized to exactly match the real grid (same column
-     * count, same icon size, same row counts as what's currently on screen) so there's
-     * no visual mismatch between the placeholder and the real content it's covering.
+     * Called every time the drawer opens. Immediately collapses (hides) the Recommended
+     * and Recent sections -- only "All Apps" shows right away -- then rebuilds those two
+     * sections with fresh usage data in the background and reveals them the moment
+     * they're stable. This is what prevents an accidental tap: since Recommended/Recent
+     * simply aren't on screen yet while they'd otherwise be reordering, there's nothing
+     * there for a tap to land on by mistake. They pop back in only once settled.
      */
-    private fun showDrawerRefreshShimmer() {
-        pendingShimmerHide?.let { shimmerHideHandler.removeCallbacks(it) }
+    private fun showDrawerRefreshLoading() {
+        pendingReveal?.let { revealHandler.removeCallbacks(it) }
 
+        val apps = cachedApps ?: return
         val existingAdapter = binding.rvApps.adapter as? AppListAdapter
-        val currentItems = existingAdapter?.currentItems().orEmpty()
-        val recommendedCount = countSectionApps(currentItems, getString(R.string.drawer_section_recommended))
-        val recentCount = countSectionApps(currentItems, getString(R.string.drawer_section_recent))
 
-        val overlay = binding.drawerShimmerOverlay
-        val neededHeight = overlay.configure(
-            columns = calculateSpanCount(),
-            iconSizePx = drawerIconSizing.iconSizePx,
-            recommendedCount = recommendedCount,
-            recentCount = recentCount
-        )
-
-        if (overlay.isEmpty()) {
-            // Nothing to placeholder yet (e.g. very first-ever open, no usage data),
-            // so there's no reordering risk -- just refresh directly, no shimmer.
+        if (existingAdapter == null) {
+            // First-ever load: nothing on screen yet to collapse, so just show the
+            // freshly built list directly.
             refreshDrawerUsageSections()
             return
         }
 
-        val params = overlay.layoutParams
-        params.height = neededHeight
-        overlay.layoutParams = params
+        // Step 1: collapse Recommended/Recent right away (All Apps stays visible).
+        existingAdapter.updateItems(buildAllAppsOnlyItems(apps))
 
-        overlay.alpha = 1f
-        overlay.startShimmer()
-
-        refreshDrawerUsageSections()
-
-        val hideRunnable = Runnable {
-            overlay.animate()
-                .alpha(0f)
-                .setDuration(SHIMMER_FADE_OUT_MS)
-                .withEndAction { overlay.stopShimmer() }
-                .start()
+        // Step 2: rebuild Recommended/Recent with up-to-date usage data and reveal them
+        // once they've had a moment to settle.
+        val revealRunnable = Runnable {
+            refreshDrawerUsageSections()
         }
-        pendingShimmerHide = hideRunnable
-        shimmerHideHandler.postDelayed(hideRunnable, SHIMMER_MIN_VISIBLE_MS)
+        pendingReveal = revealRunnable
+        revealHandler.postDelayed(revealRunnable, RECOMMENDED_REVEAL_DELAY_MS)
     }
 
-    /** Counts AppItem rows directly under the header titled [headerTitle]. */
-    private fun countSectionApps(items: List<DrawerListItem>, headerTitle: String): Int {
-        val headerIndex = items.indexOfFirst { it is DrawerListItem.Header && it.title == headerTitle }
-        if (headerIndex == -1) return 0
-        var count = 0
-        for (i in (headerIndex + 1) until items.size) {
-            when (items[i]) {
-                is DrawerListItem.Header -> return count
-                is DrawerListItem.AppItem -> count++
-            }
-        }
-        return count
+    /** Just the "All Apps" section -- used to collapse Recommended/Recent while they refresh. */
+    private fun buildAllAppsOnlyItems(allApps: List<AppEntry>): List<DrawerListItem> {
+        val items = mutableListOf<DrawerListItem>()
+        items += DrawerListItem.Header(getString(R.string.drawer_section_all_apps))
+        items += allApps.map { DrawerListItem.AppItem(it) }
+        return items
     }
 
     /**
@@ -999,7 +966,7 @@ class LauncherHomeActivity : AppCompatActivity() {
     }
 
     private fun onDrawerOpened() {
-        showDrawerRefreshShimmer()
+        showDrawerRefreshLoading()
 
         val now = System.currentTimeMillis()
 
