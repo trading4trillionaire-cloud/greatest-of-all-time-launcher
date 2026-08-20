@@ -771,6 +771,10 @@ class LauncherHomeActivity : AppCompatActivity() {
     private fun closeDrawer() {
         if (!isDrawerOpen) return
         animateToProgress(0f, false)
+        // Reset scroll so the drawer always reopens at the top -- this keeps the
+        // Recommended/Recent shimmer placeholder (which is sized/positioned assuming
+        // the list starts at position 0) perfectly aligned with the real content.
+        binding.rvApps.scrollToPosition(0)
     }
 
     private fun loadAppsAsync() {
@@ -820,24 +824,67 @@ class LauncherHomeActivity : AppCompatActivity() {
      * without it, the list can reorder (e.g. Recommended apps swapping order) at the exact
      * moment the drawer becomes touchable, so a tap aimed at one app can land on another
      * that has just taken its place. The shimmer blocks touches for that whole window.
+     *
+     * Only the Recommended + Recent sections are covered -- "All Apps" below is left
+     * alone -- and the placeholder is sized to exactly match the real grid (same column
+     * count, same icon size, same row counts as what's currently on screen) so there's
+     * no visual mismatch between the placeholder and the real content it's covering.
      */
     private fun showDrawerRefreshShimmer() {
         pendingShimmerHide?.let { shimmerHideHandler.removeCallbacks(it) }
 
-        binding.drawerShimmerOverlay.alpha = 1f
-        binding.drawerShimmerOverlay.startShimmer()
+        val existingAdapter = binding.rvApps.adapter as? AppListAdapter
+        val currentItems = existingAdapter?.currentItems().orEmpty()
+        val recommendedCount = countSectionApps(currentItems, getString(R.string.drawer_section_recommended))
+        val recentCount = countSectionApps(currentItems, getString(R.string.drawer_section_recent))
+
+        val overlay = binding.drawerShimmerOverlay
+        val neededHeight = overlay.configure(
+            columns = calculateSpanCount(),
+            iconSizePx = drawerIconSizing.iconSizePx,
+            recommendedCount = recommendedCount,
+            recentCount = recentCount
+        )
+
+        if (overlay.isEmpty()) {
+            // Nothing to placeholder yet (e.g. very first-ever open, no usage data),
+            // so there's no reordering risk -- just refresh directly, no shimmer.
+            refreshDrawerUsageSections()
+            return
+        }
+
+        val params = overlay.layoutParams
+        params.height = neededHeight
+        overlay.layoutParams = params
+
+        overlay.alpha = 1f
+        overlay.startShimmer()
 
         refreshDrawerUsageSections()
 
         val hideRunnable = Runnable {
-            binding.drawerShimmerOverlay.animate()
+            overlay.animate()
                 .alpha(0f)
                 .setDuration(SHIMMER_FADE_OUT_MS)
-                .withEndAction { binding.drawerShimmerOverlay.stopShimmer() }
+                .withEndAction { overlay.stopShimmer() }
                 .start()
         }
         pendingShimmerHide = hideRunnable
         shimmerHideHandler.postDelayed(hideRunnable, SHIMMER_MIN_VISIBLE_MS)
+    }
+
+    /** Counts AppItem rows directly under the header titled [headerTitle]. */
+    private fun countSectionApps(items: List<DrawerListItem>, headerTitle: String): Int {
+        val headerIndex = items.indexOfFirst { it is DrawerListItem.Header && it.title == headerTitle }
+        if (headerIndex == -1) return 0
+        var count = 0
+        for (i in (headerIndex + 1) until items.size) {
+            when (items[i]) {
+                is DrawerListItem.Header -> return count
+                is DrawerListItem.AppItem -> count++
+            }
+        }
+        return count
     }
 
     /**
