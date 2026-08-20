@@ -459,7 +459,7 @@
                 android:layout_width="180dp"
                 android:layout_height="180dp">
 
-                <com.goat.app.ui.ChargingRingView
+                <com.nihalthakral.nihalhome.ui.ChargingRingView
                     android:id="@+id/chargingRing"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
@@ -590,7 +590,7 @@
                     android:clipToPadding="false"
                     android:paddingBottom="24dp" />
 
-                <com.goat.app.ui.ShimmerOverlayView
+                <com.nihalthakral.nihalhome.ui.ShimmerOverlayView
                     android:id="@+id/drawerShimmerOverlay"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
