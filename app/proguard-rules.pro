@@ -1,2 +1,2 @@
 
--keep class com.goat.app.databinding.** { *; }
+-keep class com.nihalthakral.nihalhome.databinding.** { *; }
