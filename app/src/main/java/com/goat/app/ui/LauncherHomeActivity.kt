@@ -846,7 +846,7 @@ class LauncherHomeActivity : AppCompatActivity() {
         val recommended = openCounts.entries
             .filter { it.value > 0 }
             .sortedWith(
-                compareByDescending<Map.Entry<String, Int>> { it.value }
+                compareByDescending<Map.Entry<String, Float>> { it.value }
                     .thenBy { appsByPackage[it.key]?.label?.lowercase() ?: "" }
             )
             .mapNotNull { appsByPackage[it.key] }
