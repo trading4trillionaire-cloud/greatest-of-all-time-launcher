@@ -58,6 +58,8 @@ class LauncherHomeActivity : AppCompatActivity() {
     private var dragStartRawY = 0f
 
     private val appLoadExecutor = Executors.newSingleThreadExecutor()
+    private val shimmerHideHandler = Handler(Looper.getMainLooper())
+    private var pendingShimmerHide: Runnable? = null
 
     private var packageChangeReceiver: BroadcastReceiver? = null
 
@@ -90,6 +92,8 @@ class LauncherHomeActivity : AppCompatActivity() {
         // count per section is (current column/span count * these row limits).
         private const val RECOMMENDED_MAX_ROWS = 3
         private const val RECENT_MAX_ROWS = 2
+        private const val SHIMMER_MIN_VISIBLE_MS = 320L
+        private const val SHIMMER_FADE_OUT_MS = 150L
         private const val OPEN_PROGRESS_THRESHOLD = 0.08f
         private const val CLOSE_PROGRESS_THRESHOLD = 0.08f
         private const val HOME_MIN_ALPHA = 0.1f
@@ -195,6 +199,11 @@ class LauncherHomeActivity : AppCompatActivity() {
         unregisterChargingReceiver()
         binding.chargingRing.pauseGlowAnimation()
 
+        pendingShimmerHide?.let { shimmerHideHandler.removeCallbacks(it) }
+        binding.drawerShimmerOverlay.animate().cancel()
+        binding.drawerShimmerOverlay.alpha = 1f
+        binding.drawerShimmerOverlay.stopShimmer()
+
         if (currentProgress > 0f && currentProgress < 1f) {
             snapAnimator?.cancel()
             val finalProgress = if (isDrawerOpen) 1f else 0f
@@ -298,6 +307,7 @@ class LauncherHomeActivity : AppCompatActivity() {
     override fun onDestroy() {
         hintAnimator?.cancel()
         snapAnimator?.cancel()
+        pendingShimmerHide?.let { shimmerHideHandler.removeCallbacks(it) }
         packageChangeReceiver?.let { unregisterReceiver(it) }
         packageChangeReceiver = null
         appLoadExecutor.shutdown()
@@ -804,6 +814,33 @@ class LauncherHomeActivity : AppCompatActivity() {
     }
 
     /**
+     * Shows the shimmer skeleton over the drawer list, refreshes the Recommended/Recent
+     * sections underneath (hidden from view), then waits a short minimum duration before
+     * revealing the updated list. This exists specifically to prevent an accidental tap:
+     * without it, the list can reorder (e.g. Recommended apps swapping order) at the exact
+     * moment the drawer becomes touchable, so a tap aimed at one app can land on another
+     * that has just taken its place. The shimmer blocks touches for that whole window.
+     */
+    private fun showDrawerRefreshShimmer() {
+        pendingShimmerHide?.let { shimmerHideHandler.removeCallbacks(it) }
+
+        binding.drawerShimmerOverlay.alpha = 1f
+        binding.drawerShimmerOverlay.startShimmer()
+
+        refreshDrawerUsageSections()
+
+        val hideRunnable = Runnable {
+            binding.drawerShimmerOverlay.animate()
+                .alpha(0f)
+                .setDuration(SHIMMER_FADE_OUT_MS)
+                .withEndAction { binding.drawerShimmerOverlay.stopShimmer() }
+                .start()
+        }
+        pendingShimmerHide = hideRunnable
+        shimmerHideHandler.postDelayed(hideRunnable, SHIMMER_MIN_VISIBLE_MS)
+    }
+
+    /**
      * Rebuilds just the Recommended/Recent/All-apps sections from the currently cached
      * app list and the latest usage stats, and swaps the adapter in. Cheap (no package
      * manager re-query), so this is safe to call every time the drawer is opened, which
@@ -915,7 +952,7 @@ class LauncherHomeActivity : AppCompatActivity() {
     }
 
     private fun onDrawerOpened() {
-        refreshDrawerUsageSections()
+        showDrawerRefreshShimmer()
 
         val now = System.currentTimeMillis()
 
