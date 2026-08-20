@@ -831,6 +831,7 @@ class LauncherHomeActivity : AppCompatActivity() {
             // First-ever load: nothing on screen yet to collapse, so just show the
             // freshly built list directly.
             refreshDrawerUsageSections()
+            binding.rvApps.scrollToPosition(0)
             return
         }
 
@@ -838,9 +839,12 @@ class LauncherHomeActivity : AppCompatActivity() {
         existingAdapter.updateItems(buildAllAppsOnlyItems(apps))
 
         // Step 2: rebuild Recommended/Recent with up-to-date usage data and reveal them
-        // once they've had a moment to settle.
+        // once they've had a moment to settle. Also auto-scroll back to the top so the
+        // user always lands right on the newly revealed Recommended/Recent apps instead
+        // of having to scroll up manually every time.
         val revealRunnable = Runnable {
             refreshDrawerUsageSections()
+            binding.rvApps.scrollToPosition(0)
         }
         pendingReveal = revealRunnable
         revealHandler.postDelayed(revealRunnable, RECOMMENDED_REVEAL_DELAY_MS)
