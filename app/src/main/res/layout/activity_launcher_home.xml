@@ -578,13 +578,28 @@
 
             </FrameLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvApps"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:clipToPadding="false"
-                android:paddingBottom="24dp" />
+                android:layout_weight="1">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvApps"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingBottom="24dp" />
+
+                <com.goat.app.ui.ShimmerOverlayView
+                    android:id="@+id/drawerShimmerOverlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingStart="4dp"
+                    android:paddingTop="4dp"
+                    android:background="@drawable/bg_home_gradient"
+                    android:visibility="gone" />
+
+            </FrameLayout>
 
         </LinearLayout>
 
