@@ -91,7 +91,7 @@ class LauncherHomeActivity : AppCompatActivity() {
         // freely to tweak how many apps show up under each heading — the actual item
         // count per section is (current column/span count * these row limits).
         private const val RECOMMENDED_MAX_ROWS = 2
-        private const val RECENT_MAX_ROWS = 2
+        private const val RECENT_MAX_ROWS = 1
         private const val RECOMMENDED_REVEAL_DELAY_MS = 150L
         private const val OPEN_PROGRESS_THRESHOLD = 0.08f
         private const val CLOSE_PROGRESS_THRESHOLD = 0.08f
