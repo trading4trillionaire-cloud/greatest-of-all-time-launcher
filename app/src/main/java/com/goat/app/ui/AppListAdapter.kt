@@ -111,6 +111,9 @@ class AppListAdapter(
 
     override fun getItemCount(): Int = items.size
 
+    /** Returns the list currently bound to this adapter (before any in-flight diff). */
+    fun currentItems(): List<DrawerListItem> = items
+
     /**
      * Replaces the current list with [newItems] using DiffUtil, so only the rows that
      * actually changed (added / removed / moved) get updated in the RecyclerView.
