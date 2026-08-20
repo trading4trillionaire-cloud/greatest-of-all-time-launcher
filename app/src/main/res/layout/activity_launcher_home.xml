@@ -593,9 +593,8 @@
                 <com.goat.app.ui.ShimmerOverlayView
                     android:id="@+id/drawerShimmerOverlay"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:paddingStart="4dp"
-                    android:paddingTop="4dp"
+                    android:layout_height="0dp"
+                    android:layout_gravity="top"
                     android:background="@drawable/bg_home_gradient"
                     android:visibility="gone" />
 
