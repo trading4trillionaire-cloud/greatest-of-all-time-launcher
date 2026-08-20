@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.goat.app"
+    namespace = "com.nihalthakral.nihalhome"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.goat.app"
+        applicationId = "com.nihalthakral.nihalhome"
         minSdk = 26
         targetSdk = 34
         versionCode = 3
